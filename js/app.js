@@ -1399,7 +1399,7 @@ window.addEventListener('online', () => { offPaint(); fetchWeatherData(true); })
 window.addEventListener('offline', offPaint);
 offPaint();
 
-(function () { var m = $('studioMail'); if (!m) return; var a = ['mustafahakansunum', 'gmail.com'].join('@'); m.href = 'mailto:' + a; m.textContent = a; })();
+(function () { var m = $('studioMail'); if (!m) return; m.addEventListener('click', function (e) { if (m.dataset.on) return; e.preventDefault(); var a = ['mustafahakansunum', 'gmail.com'].join('@'); m.href = 'mailto:' + a; m.textContent = a; m.dataset.on = '1'; }); })();
 paintIcons();
 paintNotif();
 try { if ('serviceWorker' in navigator && window.isSecureContext) navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) {}
