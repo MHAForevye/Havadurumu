@@ -21,29 +21,33 @@ h1{margin-top:0}h2{margin:1.4em 0 .3em;font-size:1.2rem}p,li{color:var(--ink)}sm
 <small>Son güncelleme: 2 Kasım 2026</small>
 
 <h2>Kısaca</h2>
-<p>Mikro-Klima ücretsiz ve reklamsızdır. Hesap açmazsın, ad ya da e-posta vermezsin. Ayarların ve konumların senin cihazında, tarayıcının yerel depolamasında durur.</p>
+<p>Mikro-Klima ücretsizdir ve hesap açmanı istemez. Uygulama tercihlerin ve kayıtlı konumların tarayıcında saklanır. Hava tahmini için seçtiğin konumun bilgileri ilgili hava servislerine gönderilir. Ziyaret istatistikleri için GoatCounter kullanılır; bu hizmete yapılan bağlantıda IP adresin ve teknik istek bilgileri hizmet sağlayıcı tarafından görülebilir.</p>
 
 <h2>Cihazında saklanan veriler</h2>
 <ul>
-<li>Kayıtlı konumlar, tema, yazı boyutu, uyarı eşikleri, bildirim tercihi.</li>
-<li>"Kendi karnem": modellerin tahminleri ve gerçekleşenle kıyası. Bu veriler başka bir yere gönderilmez; tarayıcı verilerini silersen yok olur.</li>
+<li>Kayıtlı konumlar, seçili konum, tema, yazı boyutu, sekme ve uyarı tercihleri.</li>
+<li>"Kendi karnem" için model tahminleri ve gerçekleşen hava ile kıyaslama kayıtları.</li>
+<li>Uygulamanın çevrimdışı çalışması için sayfa dosyaları ve bazı hava servisi yanıtları tarayıcının önbelleğinde tutulabilir. Hava isteği adresleri koordinat içerebilir.</li>
 </ul>
+<p>Bu veriler uygulama hesabına bağlı bir sunucuya gönderilmez. Tarayıcı verilerini veya site verilerini silerek cihazındaki kayıtları kaldırabilirsin. Tarayıcı ve işletim sistemi bildirim izni ayrıca yönetir.</p>
 
 <h2>Üçüncü taraf servislere giden veriler</h2>
-<p>Tahmin göstermek için seçtiğin konumun koordinatları şu servislere gönderilir (bağlantı kurdukları için IP adresin de bu servislerce görülür):</p>
+<p>Tarayıcın bu hizmetlere doğrudan bağlanır. Bağlantı kurulan hizmet, normal ağ iletişimi kapsamında IP adresini ve istek için gerekli teknik bilgileri görebilir. Hava tahminini göstermek için sayfa açıldığında veya veriler yenilendiğinde seçili konumun bilgileri ilgili hava servislerine gönderilir; şehir araması ve radar/harita istekleri ilgili özellikleri kullandığında yapılır:</p>
 <ul>
-<li>Open-Meteo (hava modelleri, konum arama, rakım)</li>
-<li>MET Norway ve wttr.in (tahmin ve kısa vade yağış)</li>
-<li>RainViewer ve OpenStreetMap (yalnızca radarı açarsan; harita karoları)</li>
-<li>GitHub (sayfa barındırma ve havalimanı METAR verisinin dağıtımı)</li>
+<li>Open-Meteo: şehir aramasında yazdığın arama terimi; hava tahmini ve rakım sorgularında seçili konumun koordinatları.</li>
+<li>MET Norway ve wttr.in: hava tahmini için seçili konumun koordinatları ve gerektiğinde rakımı.</li>
+<li>RainViewer ve OpenStreetMap: radar/harita açıldığında radar verisi ve görüntülenen harita karoları için istekler.</li>
+<li>GitHub Pages ve GitHub: site dosyalarının sunulması ve havalimanı METAR verisinin indirilmesi. Bu hizmetler de sunucuya gelen isteklerin teknik bilgilerini görebilir.</li>
+<li>GoatCounter: ziyaret istatistikleri için sayfa yolu ve tarayıcının sağladığı yönlendiren sayfa bilgisi gönderilir. GoatCounter, kendi açıklamasına göre tarayıcı/işletim sistemi, ülke, dil ve ekran genişliği gibi bilgileri istatistik olarak işleyebilir. Tekrar ziyaretleri ayırt etmek için IP adresi ile tarayıcı bilgisini belleğinde en fazla 8 saat kullanabildiğini; bunları kalıcı olarak saklamadığını ve tarayıcıya çerez veya benzeri bir izleme kimliği yazmadığını belirtir. İstatistikler GoatCounter hesabında tutulur. Ayrıntı: <a href="https://www.goatcounter.com/help/privacy" target="_blank" rel="noopener">GoatCounter gizlilik açıklaması</a>.</li>
 </ul>
-<p>Yazı tipleri ve grafik kütüphaneleri artık bu sitenin kendi sunucusundan yüklenir; Google Fonts kullanılmaz.</p>
+<p>GoatCounter hizmet sağlayıcısı verilerin Finlandiya ve Almanya'daki sunucularda saklandığını bildirir. Bu nedenle hizmetin kullanılması sırasında bilgilerin Türkiye dışındaki sunuculara iletilmesi söz konusu olabilir. Üçüncü taraf hizmetlerin kendi gizlilik ve saklama koşulları da geçerlidir.</p>
+<p>Yazı tipleri ve grafik kütüphaneleri bu sitenin kendi sunucusundan yüklenir; Google Fonts kullanılmaz.</p>
 
 <h2>Konum izni</h2>
 <p>GPS yalnızca "GPS konumunu otomatik al" düğmesine bastığında, tarayıcının izin penceresiyle istenir. İzin vermek zorunda değilsin; şehir adı yazarak da konum ekleyebilirsin.</p>
 
 <h2>Çerezler ve analiz</h2>
-<p>Bu site çerez kullanmaz. Anonim ziyaret sayısı için çerezsiz GoatCounter kullanılır; kişisel veri toplanmaz.</p>
+<p>Uygulama kendi çerezlerini kullanmaz. Tercihleri saklamak için tarayıcının yerel depolamasını, çevrimdışı çalışma için de önbelleğini kullanır; bunlar çerez değildir. GoatCounter da kendi açıklamasına göre ziyaretçinin tarayıcısına çerez veya yerel depolama verisi yazmaz. Bununla birlikte, GoatCounter'a yapılan istek sırasında IP adresi ve teknik bilgiler hizmet sağlayıcı tarafından işlenebilir; bu nedenle analiz için “hiçbir kişisel veri işlenmez” denemez. GoatCounter istatistiklerini devre dışı bırakmak istersen reklam/izleme engelleyicisi kullanabilir veya tarayıcında üçüncü taraf isteklerini engelleyebilirsin; bu durumda ziyaret sayımı yapılamayabilir.</p>
 
 <h2>Bildirimler</h2>
 <p>Bildirimler tamamen cihazında üretilir; sunucuya veri gönderilmez ve uygulama kapalıyken çalışmaz.</p>
@@ -52,7 +56,7 @@ h1{margin-top:0}h2{margin:1.4em 0 .3em;font-size:1.2rem}p,li{color:var(--ink)}sm
 <p>Bu uygulama bilgilendirme amaçlıdır. Can ve mal güvenliği gerektiren durumlarda Meteoroloji Genel Müdürlüğü'nün (MGM) resmi uyarılarına bak.</p>
 
 <h2>İletişim</h2>
-<p>Sorular için uygulamadaki "Forevye · Stüdyo" sayfasında yer alan e-posta adresini kullanabilirsin.</p>
+<p>Gizlilikle ilgili sorular için uygulamadaki "Forevye · Stüdyo" sayfasında yer alan e-posta adresini kullanabilirsin.</p>
 </main>
 </body>
 </html>
