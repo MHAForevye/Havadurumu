@@ -66,6 +66,7 @@ function wIcon(c, d) {
 /* ===== Durum ===== */
 let chartInstance = null, rawApiData = null, currentMode = 'hourly';
 let activeDayIndex = 0, activeHourIndex = 0;
+let sharedCoordinatesHidden = false;
 let hours = [], days = [], nowKey = '', nowIdx = 0, reqId = 0, lastFetch = 0, lastOk = '';
 const dayNames = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
 const pad = n => String(n).padStart(2, '0');
@@ -1097,7 +1098,8 @@ function pickLoc(i) {
 function renderMeta() {
   const b = $('metaBox'); if (!b || !rawApiData) return;
   const l = savedLocations[$('locationSelect').selectedIndex] || {};
-  b.innerHTML = 'Son güncelleme: <b>' + (lastOk || '--') + '</b><br>Koordinat: <b>' + (+l.lat).toFixed(4) + ', ' + (+l.lon).toFixed(4) + '</b><br>Model yüksekliği: <b>' + fmt(rawApiData.elevation, 0, ' m') + '</b>' +
+  const coordinates = sharedCoordinatesHidden ? '' : '<br>Koordinat: <b>' + (+l.lat).toFixed(4) + ', ' + (+l.lon).toFixed(4) + '</b>';
+  b.innerHTML = 'Son güncelleme: <b>' + (lastOk || '--') + '</b>' + coordinates + '<br>Model yüksekliği: <b>' + fmt(rawApiData.elevation, 0, ' m') + '</b>' +
     (l.alt ? '<br>Girilen rakım: <b>' + escHtml(l.alt) + ' m</b>' : '');
 }
 $('locationSelect').addEventListener('change', renderLocList);
@@ -1437,6 +1439,8 @@ async function shareCurrentView() {
   url.searchParams.set('p', btoa(locationData).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
   url.searchParams.set('time', selectedHour.t);
   url.searchParams.set('mode', currentMode);
+  const activeTab = TABS.find(tab => $('panel-' + tab).classList.contains('active')) || 'today';
+  url.searchParams.set('tab', activeTab);
 
   const timeText = selectedHour.date + ' ' + pad(selectedHour.hh) + ':00';
   const shareData = {
@@ -1511,6 +1515,7 @@ function readSharedView() {
     locIndex,
     time: params.get('time'),
     mode: mode === 'daily' ? 'daily' : 'hourly',
+    tab: TABS.includes(params.get('tab')) ? params.get('tab') : null,
     day: Number.isInteger(day) ? day : null,
     hour: Number.isInteger(hour) ? hour : null
   };
@@ -1553,6 +1558,7 @@ function applySharedView(shared) {
 }
 
 const sharedView = readSharedView();
+sharedCoordinatesHidden = sharedView.locIndex >= 0;
 let selName = null;
 try { selName = localStorage.getItem(SELK); } catch (e) {}
 const initialLocIndex = sharedView.locIndex >= 0
@@ -1574,7 +1580,8 @@ if (PREFS.tab !== 'last') lastTab = PREFS.tab;
 showTab(lastTab, false);
 fetchWeatherData().then(() => {
   if (!applySharedView(sharedView)) return;
+  if (sharedView.tab) showTab(sharedView.tab, false);
   const url = new URL(window.location.href);
-  ['p', 'lat', 'lon', 'name', 'time', 'mode', 'loc', 'd', 'h'].forEach(key => url.searchParams.delete(key));
+  ['p', 'lat', 'lon', 'name', 'time', 'mode', 'tab', 'loc', 'd', 'h'].forEach(key => url.searchParams.delete(key));
   window.history.replaceState({}, '', url.pathname + url.search + url.hash);
 });
