@@ -17,7 +17,8 @@ html[data-skin="classic"][data-theme] .hero-stats { border-top:1px solid var(--b
 html[data-skin="classic"][data-theme] .topbar { border-bottom:1px solid var(--border); }
 html[data-skin="classic"][data-theme] .mode-btn { background:var(--card-bg); color:var(--subtext); border:1px solid var(--border); border-radius:8px; }
 html[data-skin="classic"][data-theme] .mode-btn.active, html[data-skin="classic"][data-theme] .chip-row .chip.active, html[data-skin="classic"][data-theme] .loc-item.active, html[data-skin="classic"][data-theme] .hour-chip.active, html[data-skin="classic"][data-theme] .day-chip.active { background:var(--selected-bg); color:var(--selected-text); border-color:var(--selected-border); }
-html[data-skin="classic"][data-theme] .loc-item.active .loc-meta { color:var(--selected-text); }
+html[data-skin="classic"][data-theme] #locList .loc-item.active { background:#ffe08a !important; color:#3b3320 !important; border-color:#d5a900 !important; }
+html[data-skin="classic"][data-theme] #locList .loc-item.active .loc-meta { color:#3b3320 !important; }
 html[data-skin="classic"][data-theme] .add-location-box { background:transparent; border:1px dashed var(--border); }
 html[data-skin="classic"][data-theme] .param-item { background:rgba(100,116,139,.08); border:1px solid var(--border); box-shadow:none; transform:none; border-radius:8px; }
 html[data-skin="classic"][data-theme] .day-chip, html[data-skin="classic"][data-theme] .hour-chip { background:rgba(100,116,139,.08); color:var(--text); border:1px solid var(--border); border-radius:8px; }
@@ -42,7 +43,7 @@ html[data-skin="classic"][data-theme] #btnDelLoc { background:rgba(239,68,68,.15
 html[data-skin="classic"][data-theme] #btnNotif.on, html[data-skin="classic"][data-theme] #btnSkin.on { background:var(--selected-bg); color:var(--selected-text); border-color:var(--selected-border); }
 html[data-skin="classic"][data-theme] .tabbar { background:var(--card-bg); border-top:1px solid var(--border); }
 html[data-skin="classic"][data-theme] .tabbar .tab { background:transparent; color:var(--subtext); border-color:transparent; box-shadow:none; }
-html[data-skin="classic"][data-theme] .tabbar .tab.active { background:var(--selected-bg); color:var(--selected-text); border-color:var(--selected-border); }
+html[data-skin="classic"][data-theme] .tabbar .tab.active { background:#ffe08a !important; color:#3b3320 !important; border-color:#d5a900 !important; }
 html[data-skin="classic"][data-theme] .info-overlay { background:rgba(2,6,23,.55); }
 html[data-skin="classic"][data-theme] .info-sheet { background:var(--card-bg); color:var(--text); border:1px solid var(--border); border-bottom:none; border-radius:18px 18px 0 0; }
 html[data-skin="classic"][data-theme] .info-sheet-head { color:var(--accent); border-bottom:1px solid var(--border); }
