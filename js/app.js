@@ -1418,9 +1418,132 @@ paintIcons();
 paintNotif();
 try { if ('serviceWorker' in navigator && window.isSecureContext) navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) {}
 setSkin(curSkin(), false);
+
+async function shareCurrentView() {
+  const sel = $('locationSelect');
+  const selectedHour = win()[activeHourIndex];
+  if (!sel || !sel.value || !selectedHour) return;
+
+  const selectedLoc = savedLocations[sel.selectedIndex];
+  const url = new URL(window.location.href);
+  url.search = '';
+  url.searchParams.set('lat', selectedLoc.lat);
+  url.searchParams.set('lon', selectedLoc.lon);
+  url.searchParams.set('name', selectedLoc.name);
+  url.searchParams.set('time', selectedHour.t);
+  url.searchParams.set('mode', currentMode);
+
+  const timeText = selectedHour.date + ' ' + pad(selectedHour.hh) + ':00';
+  const shareData = {
+    title: 'Mikro-Klima: ' + selectedLoc.name,
+    text: selectedLoc.name + ', ' + timeText + ' hava durumu:',
+    url: url.toString()
+  };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url.toString());
+      alert('Paylaşım bağlantısı panoya kopyalandı!');
+    } else {
+      window.prompt('Paylaşım bağlantısını kopyalayın:', url.toString());
+    }
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      console.error('Paylaşım hatası:', err);
+      window.prompt('Paylaşım bağlantısını kopyalayın:', url.toString());
+    }
+  }
+}
+
+function readSharedView() {
+  const params = new URLSearchParams(window.location.search);
+  let lat = params.get('lat'), lon = params.get('lon');
+  let name = params.get('name');
+
+  if ((!lat || !lon) && params.has('loc')) {
+    const parts = params.get('loc').split(',');
+    lat = parts[0];
+    lon = parts[1];
+    name = parts.slice(2).join(',');
+    try { name = decodeURIComponent(name); } catch (e) {}
+  }
+
+  let locIndex = -1;
+  const latitude = Number(lat), longitude = Number(lon);
+  if (lat !== null && lon !== null && isFinite(latitude) && isFinite(longitude) &&
+      Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180) {
+    locIndex = savedLocations.findIndex(l =>
+      Math.abs(parseFloat(l.lat) - latitude) < 0.01 && Math.abs(parseFloat(l.lon) - longitude) < 0.01);
+    if (locIndex === -1) {
+      savedLocations.unshift({
+        name: name || 'Paylaşılan Konum',
+        lat: String(latitude),
+        lon: String(longitude),
+        alt: ''
+      });
+      safeStore();
+      locIndex = 0;
+    }
+  }
+
+  const day = params.has('d') ? Number(params.get('d')) : null;
+  const hour = params.has('h') ? Number(params.get('h')) : null;
+  const mode = params.get('mode');
+  return {
+    locIndex,
+    time: params.get('time'),
+    mode: mode === 'daily' ? 'daily' : 'hourly',
+    day: Number.isInteger(day) ? day : null,
+    hour: Number.isInteger(hour) ? hour : null
+  };
+}
+
+function applySharedView(shared) {
+  if (!hours.length || !days.length) return false;
+
+  if (shared.time) {
+    const target = hours.findIndex(h => h.t === shared.time);
+    if (target < 0) return false;
+    const dayIndex = days.findIndex(d => d.date === hours[target].date);
+    if (dayIndex < 0) return false;
+
+    if (shared.mode === 'daily' || target < nowIdx || target >= nowIdx + 24) {
+      setMode('daily');
+      selectDay(dayIndex);
+      const hourIndex = win().findIndex(h => h.t === hours[target].t);
+      if (hourIndex < 0) return false;
+      selectHour(hourIndex);
+    } else {
+      setMode('hourly');
+      selectHour(target - nowIdx);
+    }
+    return true;
+  }
+
+  if (shared.day !== null || shared.hour !== null) {
+    const dayIndex = shared.day === null ? 0 : shared.day;
+    if (dayIndex < 0 || dayIndex >= days.length) return false;
+    setMode('daily');
+    selectDay(dayIndex);
+    if (shared.hour !== null) {
+      const hourCount = win().length;
+      if (shared.hour < 0 || shared.hour >= hourCount) return false;
+      selectHour(shared.hour);
+    }
+  }
+  return true;
+}
+
+const sharedView = readSharedView();
 let selName = null;
 try { selName = localStorage.getItem(SELK); } catch (e) {}
-initLocations(Math.max(0, savedLocations.findIndex(l => l.name === selName)));
+const initialLocIndex = sharedView.locIndex >= 0
+  ? sharedView.locIndex
+  : Math.max(0, savedLocations.findIndex(l => l.name === selName));
+initLocations(initialLocIndex);
+
 $('btnDelLoc').addEventListener('click', () => {
   if (savedLocations.length <= 1) return alert("Son konum silinemez.");
   const i = $('locationSelect').selectedIndex;
@@ -1433,91 +1556,9 @@ $('btnDelLoc').addEventListener('click', () => {
 let lastTab = 'today'; try { lastTab = localStorage.getItem('mk_tab') || 'today'; } catch (e) {}
 if (PREFS.tab !== 'last') lastTab = PREFS.tab;
 showTab(lastTab, false);
-fetchWeatherData();
-/* ===== Paylaşılabilir Link Oluşturma ve Okuma Eklemeleri ===== */
-async function shareCurrentView() {
-  const sel = $('locationSelect');
-  if (!sel || !sel.value) return;
-
-  const locName = savedLocations[sel.selectedIndex]?.name || '';
-  const coords = sel.value; 
-  
-  const url = new URL(window.location.origin + window.location.pathname);
-  url.searchParams.set('loc', `${coords.split(',')[0]},${coords.split(',')[1]},${encodeURIComponent(locName)}`);
-  url.searchParams.set('d', activeDayIndex);
-  url.searchParams.set('h', activeHourIndex);
-
-  const hourText = String(activeHourIndex).padStart(2, '0') + ':00';
-  const dayText = activeDayIndex === 0 ? 'bugün' : `${activeDayIndex} gün sonra`;
-  const shareData = {
-    title: `Mikro-Klima: ${locName}`,
-    text: `${locName}, ${dayText} saat ${hourText} hava durumu:`,
-    url: url.toString()
-  };
-
-  try {
-    if (navigator.share) {
-      await navigator.share(shareData);
-    } else {
-      await navigator.clipboard.writeText(url.toString());
-      alert('Paylaşım bağlantısı panoya kopyalandı!');
-    }
-  } catch (err) {
-    if (err.name !== 'AbortError') console.error('Paylaşım hatası:', err);
-  }
-}
-
-function readUrlParams() {
-  const params = new URLSearchParams(window.location.search);
-  const locParam = params.get('loc');
-  const dParam = params.get('d');
-  const hParam = params.get('h');
-
-  let targetIndex = -1;
-
-  if (locParam) {
-    const [latStr, lonStr, nameEnc] = locParam.split(',');
-    const lat = parseFloat(latStr);
-    const lon = parseFloat(lonStr);
-    const name = nameEnc ? decodeURIComponent(nameEnc) : 'Paylaşılan Konum';
-
-    if (isFinite(lat) && isFinite(lon)) {
-      targetIndex = savedLocations.findIndex(l => Math.abs(parseFloat(l.lat) - lat) < 0.01 && Math.abs(parseFloat(l.lon) - lon) < 0.01);
-      
-      if (targetIndex === -1) {
-        savedLocations.unshift({ name: name, lat: String(lat), lon: String(lon), alt: '' });
-        safeStore();
-        targetIndex = 0;
-      }
-    }
-  }
-
-  return {
-    locIndex: targetIndex,
-    day: dParam !== null ? parseInt(dParam, 10) : null,
-    hour: hParam !== null ? parseInt(hParam, 10) : null
-  };
-}
-
-// URL parametrelerini başlangıç akışına entegre etme
-const urlState = readUrlParams();
-let selNameInit = null;
-try { selNameInit = localStorage.getItem(SELK); } catch (e) {}
-
-const initialLocIndex = urlState.locIndex !== -1 
-  ? urlState.locIndex 
-  : Math.max(0, savedLocations.findIndex(l => l.name === selNameInit));
-
-initLocations(initialLocIndex);
-
 fetchWeatherData().then(() => {
-  if (urlState.day !== null && !isNaN(urlState.day)) {
-    selectDay(urlState.day);
-  }
-  if (urlState.hour !== null && !isNaN(urlState.hour)) {
-    selectHour(urlState.hour);
-  }
-  if (urlState.locIndex !== -1 || urlState.day !== null || urlState.hour !== null) {
-    window.history.replaceState({}, '', window.location.pathname);
-  }
+  if (!applySharedView(sharedView)) return;
+  const url = new URL(window.location.href);
+  ['lat', 'lon', 'name', 'time', 'mode', 'loc', 'd', 'h'].forEach(key => url.searchParams.delete(key));
+  window.history.replaceState({}, '', url.pathname + url.search + url.hash);
 });
