@@ -89,7 +89,7 @@ Kendi indeksim olduğu için resmî bir uyarının yerini tutmaz, can ve mal gü
 - Ana ekrana eklenebilir (PWA), çevrimdışı çalışır
 - Sık sorulan sorular ve gizlilik sayfası
 
-## <img src="docs/h-08.svg" alt="Neler yok ">
+## <img src="docs/h-08.svg" alt="Neler yok">
 
 - <mark>**Hesap, reklam ve kendi sunucum yok.**</mark> Tercihlerin tarayıcında kalır.
 - <mark>**Resmi uyarı yok.**</mark> Can ve mal güvenliği gerektiren durumlarda Meteoroloji Genel Müdürlüğü'nün (MGM) uyarılarına bak.
