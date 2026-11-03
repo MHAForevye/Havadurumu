@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^node --check js/app\\.js && node -e 'const fs=require\\(\"fs\"\\); const html=fs\\.readFileSync\\(\"index\\.html\",\"utf8\"\\); const manifest=JSON\\.parse\\(fs\\.readFileSync\\(\"manifest\\.webmanifest\",\"utf8\"\\)\\); const jsonLd=\\[\\.\\.\\.html\\.matchAll\\(/<script type=\"application\\\\/ld\\\\\\+json\">\\(\\[\\\\s\\\\S\\]\\*\\?\\)<\\\\/script>/g\\)\\]; if \\(!html\\.includes\\(\"<title>Mikro-Klima Kontrol Merkezi</title>\"\\)\\) throw Error\\(\"index title mismatch\"\\); if \\(manifest\\.name !== \"Mikro-Klima Kontrol Merkezi\" \\|\\| manifest\\.short_name !== manifest\\.name\\) throw Error\\(\"manifest name mismatch\"\\); jsonLd\\.forEach\\(match=>JSON\\.parse\\(match\\[1\\]\\)\\); if \\(html\\.includes\\(\"\\\\\"alternateName\\\\\": \\\\\"Mikro-Klima\\\\\"\"\\)\\) throw Error\\(\"old structured app name remains\"\\); console\\.log\\(\"JS syntax, manifest JSON, title, and JSON-LD validated\\.\"\\);'$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

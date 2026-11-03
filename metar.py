@@ -6,7 +6,7 @@ OUT = 'out/metar-tr.json'
 KEEP = 72 * 3600
 now = int(time.time())
 
-req = urllib.request.Request(SRC, headers={'User-Agent': 'mikroklima-metar/1.0'})
+req = urllib.request.Request(SRC, headers={'User-Agent': 'mikro-klima-kontrol-merkezi-metar/1.0'})
 with urllib.request.urlopen(req, timeout=60) as r:
     body = r.read()
 new = json.loads(body) if body.strip() else []   # boş cevap = veri yok (204)

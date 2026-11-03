@@ -1381,7 +1381,7 @@ function memTick() {
   memRecord(); memVerify(); if ($('panel-sources').classList.contains('active')) memRender();
 }
 function memToggle() { try { localStorage.setItem(MKON, memOn() ? '0' : '1'); } catch (e) {} memRender(); scheduleFuse(); }
-function memExport() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(memLoad())], { type: 'application/json' })); a.download = 'mikroklima-karne.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); }
+function memExport() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(memLoad())], { type: 'application/json' })); a.download = 'mikro-klima-kontrol-merkezi-karne.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); }
 function memImport(inp) { const f = inp.files[0]; if (!f) return; f.text().then(t => { const o = JSON.parse(t); if (!o || !o.locs) throw 0; MEM = o; memSave(); memRender(); scheduleFuse(); }).catch(() => alert('Dosya geçersiz.')); inp.value = ''; }
 function memReset() { if (!confirm('Kendi karne belleği silinsin mi?')) return; MEM = { locs: {} }; memSave(); memRender(); scheduleFuse(); }
 
@@ -1460,7 +1460,7 @@ async function shareCurrentView() {
 
   const timeText = selectedHour.date + ' ' + pad(selectedHour.hh) + ':00';
   const shareData = {
-    title: 'Mikro-Klima: ' + selectedLoc.name,
+    title: 'Mikro-Klima Kontrol Merkezi: ' + selectedLoc.name,
     text: selectedLoc.name + ', ' + timeText + ' hava durumu:',
     url: url.toString()
   };
