@@ -1058,7 +1058,7 @@ function paintMetricChips() {
 function setMetric(k) { metricKey = k; paintMetricChips(); if (hours.length) renderMetric(win()); }
 function renderMetric(w) {
   const cv = $('metricChart'); if (!cv || typeof Chart === 'undefined' || !w || !w.length) return;
-  const m = METRICS.find(x => x.k === metricKey), t = CHART_THEME[curTheme()];
+  const m = METRICS.find(x => x.k === metricKey), t = CHART_THEME[chartKey()];
   const labels = w.map(h => pad(h.hh) + ':00');
   const num = (f, h) => { const v = f(h); return (v == null || isNaN(v)) ? null : +(+v).toFixed(m.d); };
   const vals = w.map(h => num(m.f, h));
@@ -1106,12 +1106,16 @@ $('btnRefresh2').addEventListener('click', () => fetchWeatherData());
 
 /* ===== Gece / gündüz teması ===== */
 const CHART_THEME = {
+  cl_light: { bar:'#7dd3fc', barB:'#0284c7', line:'#f43f5e', pt:'#ffffff', ptB:'#f43f5e', leg:'#475569', tick:'#475569', y:'#0284c7', y1:'#e11d48', grid:'#33415522' },
+  cl_dark:  { bar:'#38bdf8', barB:'#0ea5e9', line:'#fb7185', pt:'#1e293b', ptB:'#fb7185', leg:'#94a3b8', tick:'#94a3b8', y:'#38bdf8', y1:'#fb7185', grid:'#94a3b822' },
   light: { bar:'#b5dff5', barB:'#4a3426', line:'#f29cb9', pt:'#fff1b8', ptB:'#4a3426', leg:'#8b7262', tick:'#8b7262', y:'#4a97c4', y1:'#d9779b', grid:'#4a342622' },
   dark:  { bar:'#8fc3e6', barB:'#f3e8d4', line:'#ffb8d0', pt:'#ffe69a', ptB:'#f3e8d4', leg:'#b6abc9', tick:'#b6abc9', y:'#9fd3f0', y1:'#ffb8d0', grid:'#f3e8d424' }
 };
 const curTheme = () => document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+const curSkin = () => document.documentElement.getAttribute('data-skin') === 'pastel' ? 'pastel' : 'classic';
+const chartKey = () => (curSkin() === 'classic' ? 'cl_' : '') + curTheme();
 function applyChartTheme() {
-  const c = chartInstance; if (!c) return; const t = CHART_THEME[curTheme()];
+  const c = chartInstance; if (!c) return; const t = CHART_THEME[chartKey()];
   const b = c.data.datasets[0], l = c.data.datasets[1], sc = c.options.scales;
   b.backgroundColor = t.bar; b.borderColor = t.barB;
   l.borderColor = t.line; l.backgroundColor = t.pt; l.pointBorderColor = t.ptB; l.pointBackgroundColor = t.pt;
@@ -1122,13 +1126,22 @@ function applyChartTheme() {
 function setTheme(t, save) {
   document.documentElement.setAttribute('data-theme', t);
   if (save) { try { localStorage.setItem('mk_theme', t); } catch (e) {} }
-  const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = t === 'dark' ? '#1e1a2e' : '#fdf1dc';
+  const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = curSkin() === 'classic' ? (t === 'dark' ? '#0f172a' : '#f1f5f9') : (t === 'dark' ? '#1e1a2e' : '#fdf1dc');
   const ic = $('themeIco'); if (ic) { ic.dataset.ico = t === 'dark' ? 'sun' : 'moon'; ic.innerHTML = ico(ic.dataset.ico); }
   applyChartTheme();
   if (hours.length) { try { renderMetric(win()); } catch (e) {} }
 }
 $('btnNotif').addEventListener('click', toggleNotif);
 $('btnTheme').addEventListener('click', () => setTheme(curTheme() === 'dark' ? 'light' : 'dark', true));
+function setSkin(s, save) {
+  document.documentElement.setAttribute('data-skin', s === 'pastel' ? 'pastel' : 'classic');
+  if (save) { try { localStorage.setItem('mk_skin', curSkin()); } catch (e) {} }
+  const on = curSkin() === 'pastel', b = $('btnSkin');
+  if (b) { b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+  const st = $('skinState'); if (st) st.textContent = on ? 'Açık' : 'Kapalı';
+  setTheme(curTheme(), false);
+}
+$('btnSkin').addEventListener('click', () => setSkin(curSkin() === 'pastel' ? 'classic' : 'pastel', true));
 
 document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.hour-chip,.day-chip')) { e.preventDefault(); e.target.click(); } });
 /* ===== Forevye stüdyo sayfası ===== */
@@ -1149,7 +1162,7 @@ $('prefHot').addEventListener('change', () => readNum('prefHot', 'hot'));
 $('prefCold').addEventListener('change', () => readNum('prefCold', 'cold'));
 $('prefGust').addEventListener('change', () => readNum('prefGust', 'gust'));
 $('btnBackup').addEventListener('click', async () => {
-  const txt = JSON.stringify({ mk: 1, locs: savedLocations, prefs: PREFS, theme: curTheme() });
+  const txt = JSON.stringify({ mk: 1, locs: savedLocations, prefs: PREFS, theme: curTheme(), skin: curSkin() });
   try { await navigator.clipboard.writeText(txt); alert('Yedek kopyalandı.'); }
   catch (e) { prompt('Kopyalama izni yok. Bu metni elle kopyala:', txt); }
 });
@@ -1162,6 +1175,7 @@ $('btnRestore').addEventListener('click', () => {
     savedLocations = L.map(l => ({ name: String(l.name), lat: String(l.lat), lon: String(l.lon), alt: l.alt == null ? '' : String(l.alt) }));
     safeStore(); PREFS = sanePrefs(o.prefs); savePrefs(); applyFont(); fillPrefs(); scheduleRefresh();
     if (o.theme === 'dark' || o.theme === 'light') setTheme(o.theme, true);
+    if (o.skin === 'pastel' || o.skin === 'classic') setSkin(o.skin, true);
     initLocations(0); fetchWeatherData(); alert('Yedek yüklendi.');
   } catch (e) { alert('Yedek okunamadı.'); }
 });
@@ -1403,7 +1417,7 @@ offPaint();
 paintIcons();
 paintNotif();
 try { if ('serviceWorker' in navigator && window.isSecureContext) navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) {}
-setTheme(curTheme(), false);
+setSkin(curSkin(), false);
 let selName = null;
 try { selName = localStorage.getItem(SELK); } catch (e) {}
 initLocations(Math.max(0, savedLocations.findIndex(l => l.name === selName)));

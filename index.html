@@ -26,9 +26,9 @@
   <link rel="apple-touch-icon" href="icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <script>(function(){var t=null;try{t=localStorage.getItem("mk_theme")}catch(e){}if(!t)t=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";document.documentElement.setAttribute("data-theme",t);})();</script>
+  <script>(function(){var t=null;try{t=localStorage.getItem("mk_theme")}catch(e){}if(!t)t=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";document.documentElement.setAttribute("data-theme",t);var k=null;try{k=localStorage.getItem("mk_skin")}catch(e){}document.documentElement.setAttribute("data-skin",k==="pastel"?"pastel":"classic");})();</script>
   
-  <link rel="stylesheet" href="css/fonts.css"><link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/fonts.css"><link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/classic.css">
   <script src="lib/chart.umd.min.js"></script>
 <script data-goatcounter="https://havadurumu.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -229,6 +229,7 @@
         <p class="hint">Bildirimler uygulama ya da sayfa açıkken (arka planda olabilir) çalışır; tamamen kapalıyken gelmez.</p>
         <div class="stack">
           <button id="btnTheme" class="setting-btn"><span class="ico" id="themeIco" data-ico="moon" style="--s:22px"></span>Gece / gündüz teması</button>
+          <button id="btnSkin" class="setting-btn" aria-pressed="false"><span class="ico" data-ico="face" style="--s:22px"></span>Çizgi film teması<span class="state" id="skinState">Kapalı</span></button>
           <button id="btnNotif" class="setting-btn" aria-pressed="false"><span class="ico" data-ico="bell" style="--s:22px"></span>Bildirimler<span class="state" id="notifState">Kapalı</span></button>
         </div>
       </div>
