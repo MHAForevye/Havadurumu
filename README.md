@@ -41,7 +41,28 @@ Kendi hava modelimi çalıştırmıyorum, yeni bir fizik de icat etmiyorum. Mete
 
 ### <img src="docs/h-05.svg" alt="Mikro-Klima skoru">
 
-0-10 arası tek bir sayı: yağış potansiyeli ve atmosferik gerilim. <mark>**Yağış miktarı tahmini değildir**</mark>, miktar için mm değerine bak. Ağırlıklar yaklaşık olarak %30 nem, %25 çiy açığı, %25 bulut, %20 yağış olasılığı; CAPE ve atmosfer ek puanları ve yağış varsa alt sınır eklenir. Bu, uygulamaya özgü sezgisel bir formüldür. Bilimsel olarak doğrulanmış bir indeks ya da resmi uyarı değildir.
+Her şey, fotoğraf çekmek için havayı beklemekle başladı. Uygulamalar bana "%60 yağış" diyordu. Ben ise bir yüzdeden fazlasını istiyordum: havanın o an ne kadar <mark>**gergin**</mark> olduğunu. Yağmurdan önce nem yükselir, sıcaklıkla çiy noktası birbirine yaklaşır, bulutlar kalınlaşır, basınç düşmeye başlar. Bunlar zaten ayrı ayrı yayımlanıyordu ama hiçbiri bana tek bakışta "şimdi mi, biraz sonra mı?" demiyordu.
+
+Ben de hepsini kendi aklımca tartıp tek bir sayıya sıkıştırdım: 0'da açık ve dingin, 10'da fırtınanın kıyısı. İlk sürümü yağmurlu iki günde yazdım, sonraki güneşli günlerde ağırlıkları ve eşikleri oynadım. Bu yüzden skor <mark>**bana ait**</mark>: hiçbir kurumun hazır indeksi değil, formülü, ağırlıkları ve eşikleri ben seçtim ve kullandıkça geliştiriyorum.
+
+Skor yağış potansiyelini ve atmosferik gerilimi gösterir, yağış miktarını değil. Miktar için mm değerine bak.
+
+- %30 nem
+- %25 çiy açığı (sıcaklık ile çiy noktası arasındaki fark)
+- %25 bulut
+- %20 yağış olasılığı
+- CAPE ve atmosfer ek puanı (hızlı basınç düşüşü, 700 hPa nemi, toplam su buharı, kaldırma indeksi)
+- Model yağış veriyorsa alt sınır: 0,1 mm ve üstü en az 6, 1 mm ve üstü 7,5, 4 mm ve üstü ya da fırtına işareti varsa 9
+
+| Skor | Anlamı |
+|---|---|
+| 0-1,9 | Açık, kuru, kararlı |
+| 2-3,9 | Sakin, hafif nemli |
+| 4-5,9 | Sınırda, potansiyel dönem |
+| 6-7,9 | Yüksek yağış potansiyeli |
+| 8-10 | Kritik: fırtına, şiddetli yağış riski |
+
+Kendi indeksim olduğu için resmî bir uyarının yerini tutmaz, can ve mal güvenliği gerektiğinde MGM'ye bak.
 
 ### <img src="docs/h-06.svg" alt="Senaryolar">
 
