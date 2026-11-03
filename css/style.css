@@ -555,3 +555,20 @@
 .mem-btns{display:grid;gap:8px;margin-top:10px}
 
 .credit-line a { display:inline-block; color:var(--subtext); font-size:.95rem; padding:12px 14px; min-height:46px; }
+
+body.share-presentation { padding-bottom:calc(18px + env(safe-area-inset-bottom,0px)); }
+body.share-presentation .top-actions #btnShare,
+body.share-presentation .top-actions #btnFaq,
+body.share-presentation .loc-row,
+body.share-presentation .tabbar,
+body.share-presentation .credit-line,
+body.share-presentation #panel-detail,
+body.share-presentation #panel-sources,
+body.share-presentation #panel-settings,
+body.share-presentation #panel-today > .setting-btn { display:none !important; }
+body.share-presentation #panel-today.active { display:flex !important; flex-direction:column; }
+body.share-presentation #selBlock { display:block !important; }
+body.share-presentation .shared-heading { display:flex; flex-direction:column; gap:3px; color:var(--subtext); font-size:.9rem; }
+body.share-presentation .shared-heading strong { color:var(--ink); font-size:1.15rem; }
+body.share-presentation #heroCard { width:100%; }
+body.share-presentation #selBlock { width:100%; }

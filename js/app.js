@@ -66,7 +66,7 @@ function wIcon(c, d) {
 /* ===== Durum ===== */
 let chartInstance = null, rawApiData = null, currentMode = 'hourly';
 let activeDayIndex = 0, activeHourIndex = 0;
-let sharedCoordinatesHidden = false;
+let sharedCoordinatesHidden = false, sharedPresentation = false;
 let hours = [], days = [], nowKey = '', nowIdx = 0, reqId = 0, lastFetch = 0, lastOk = '';
 const dayNames = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
 const pad = n => String(n).padStart(2, '0');
@@ -144,7 +144,7 @@ function setMode(m) {
   $('dayStrip').style.display = m === 'daily' ? 'flex' : 'none';
   if (m === 'daily') activeDayIndex = 0;
   if (!hours.length) { fetchWeatherData(); return; }
-  resetSel(); render();
+  resetSel(); render(); updateSharedUrl();
 }
 
 /* ===== GPS ===== */
@@ -350,8 +350,17 @@ function render() {
   renderStrip(w); renderSelected(w); renderChart(w); renderNow(); renderAlerts();
   try { renderHero(); renderOutlook(); renderMetric(w); renderMeta(); renderLocList(); } catch (e) { console.error(e); }
 }
-function selectDay(i) { activeDayIndex = i; resetSel(); render(); }
-function selectHour(i) { activeHourIndex = i; const w = win(); renderStrip(w); renderSelected(w); renderChart(w); try { renderMetric(w); } catch (e) {} }
+function updateSharedUrl() {
+  if (!sharedPresentation) return;
+  const selected = win()[activeHourIndex];
+  if (!selected) return;
+  const url = new URL(window.location.href);
+  url.searchParams.set('time', selected.t);
+  url.searchParams.set('mode', currentMode);
+  window.history.replaceState({}, '', url.pathname + url.search + url.hash);
+}
+function selectDay(i) { activeDayIndex = i; resetSel(); render(); updateSharedUrl(); }
+function selectHour(i) { activeHourIndex = i; const w = win(); renderStrip(w); renderSelected(w); renderChart(w); if (sharedPresentation) renderHero(); try { renderMetric(w); } catch (e) {} updateSharedUrl(); }
 
 function renderDays() {
   $('dayStrip').innerHTML = days.map((d, i) =>
@@ -1018,13 +1027,16 @@ function notifyAlerts(A) {
 /* ===== v3: özet kartı, notlar, 7 günlük bakış, ölçüm grafiği, konum listesi ===== */
 const escHtml = x => String(x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 function renderHero() {
-  const h = hours[nowIdx] || hours[0]; if (!h) return;
+  const h = (sharedPresentation ? win()[activeHourIndex] : null) || hours[nowIdx] || hours[0]; if (!h) return;
   const d = days.find(x => x.date === h.date);
   $('heroIcon').innerHTML = ico(vizIcon(h));
   $('heroTemp').textContent = fmt(h.temp, 0, '°');
   $('heroDesc').textContent = WMO[h.code] || '—';
   $('heroFeels').textContent = 'Hissedilen ' + fmt(h.feels, 0, '°');
-  $('heroHiLo').textContent = d ? 'En yüksek ' + Math.round(d.tmax) + '° · en düşük ' + Math.round(d.tmin) + '°' : '';
+  const range = d ? 'En yüksek ' + Math.round(d.tmax) + '° · en düşük ' + Math.round(d.tmin) + '°' : '';
+  $('heroHiLo').textContent = sharedPresentation
+    ? h.date.slice(8, 10) + '.' + h.date.slice(5, 7) + '.' + h.date.slice(0, 4) + ' · ' + pad(h.hh) + ':00' + (range ? ' · ' + range : '')
+    : range;
   const st = [['Nem', fmt(h.hum, 0, '%')], ['Rüzgâr', fmt(h.wind, 0, ' km/h')], ['UV', fmt(h.uv, 1)], ['Basınç', fmt(h.press, 0, ' hPa')]];
   $('heroStats').innerHTML = st.map(x => '<div><div class="quick-item-title">' + x[0] + '</div><div class="quick-item-val">' + x[1] + '</div></div>').join('');
 }
@@ -1513,6 +1525,7 @@ function readSharedView() {
   const mode = params.get('mode');
   return {
     locIndex,
+    isShared: params.has('p') || params.has('loc') || params.has('lat') || params.has('lon'),
     time: params.get('time'),
     mode: mode === 'daily' ? 'daily' : 'hourly',
     tab: TABS.includes(params.get('tab')) ? params.get('tab') : null,
@@ -1558,13 +1571,19 @@ function applySharedView(shared) {
 }
 
 const sharedView = readSharedView();
+sharedPresentation = sharedView.isShared;
 sharedCoordinatesHidden = sharedView.locIndex >= 0;
+document.body.classList.toggle('share-presentation', sharedPresentation);
 let selName = null;
 try { selName = localStorage.getItem(SELK); } catch (e) {}
 const initialLocIndex = sharedView.locIndex >= 0
   ? sharedView.locIndex
   : Math.max(0, savedLocations.findIndex(l => l.name === selName));
 initLocations(initialLocIndex);
+if (sharedPresentation) {
+  $('sharedHeading').hidden = false;
+  $('sharedLocationName').textContent = savedLocations[initialLocIndex]?.name || 'Hava durumu';
+}
 
 $('btnDelLoc').addEventListener('click', () => {
   if (savedLocations.length <= 1) return alert("Son konum silinemez.");
@@ -1577,11 +1596,15 @@ $('btnDelLoc').addEventListener('click', () => {
 });
 let lastTab = 'today'; try { lastTab = localStorage.getItem('mk_tab') || 'today'; } catch (e) {}
 if (PREFS.tab !== 'last') lastTab = PREFS.tab;
+if (sharedPresentation) lastTab = 'today';
 showTab(lastTab, false);
 fetchWeatherData().then(() => {
-  if (!applySharedView(sharedView)) return;
-  if (sharedView.tab) showTab(sharedView.tab, false);
-  const url = new URL(window.location.href);
-  ['p', 'lat', 'lon', 'name', 'time', 'mode', 'tab', 'loc', 'd', 'h'].forEach(key => url.searchParams.delete(key));
-  window.history.replaceState({}, '', url.pathname + url.search + url.hash);
+  const restored = applySharedView(sharedView);
+  if (sharedPresentation) {
+    showTab('today', false);
+    $('outlookCard').after($('selBlock'));
+    $('sharedLocationName').textContent = savedLocations[$('locationSelect').selectedIndex]?.name || 'Hava durumu';
+  } else if (sharedView.tab && restored) {
+    showTab(sharedView.tab, false);
+  }
 });
