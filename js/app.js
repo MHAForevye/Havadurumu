@@ -251,7 +251,9 @@ function setStatus(m, err) { const s = $('statusText'); s.textContent = m; s.sty
 async function fetchWeatherData(auto) {
   const sel = $('locationSelect');
   if (!sel || !sel.value) return;
-  try { localStorage.setItem(SELK, savedLocations[sel.selectedIndex].name); } catch (e) {}
+  if (!sharedPresentation) {
+    try { localStorage.setItem(SELK, savedLocations[sel.selectedIndex].name); } catch (e) {}
+  }
   const p = sel.value.split(',');
   const lat = parseFloat(p[0]), lon = parseFloat(p[1]);
   const alt = (p[2] === undefined || p[2] === '') ? NaN : Number(p[2]);
@@ -1517,7 +1519,6 @@ function readSharedView() {
         lon: String(longitude),
         alt: ''
       });
-      safeStore();
       locIndex = 0;
     }
   }
