@@ -2,7 +2,7 @@
 
 Ücretsiz, reklamsız, hesap istemeyen bir hava durumu uygulaması. Tek bir servise güvenmek yerine onlarca kaynağı yan yana koyar, birleştirir ve geçmişte hangisinin bölgende daha sık haklı çıktığına bakar.
 
-Forevye tarafından geliştirildi.
+Forevye tarafından geliştirildi, yani ben.
 
 ---
 
