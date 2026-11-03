@@ -91,7 +91,7 @@ Kendi indeksim olduğu için resmî bir uyarının yerini tutmaz, can ve mal gü
 
 ## <img src="docs/h-08.svg" alt="Neler yok ">
 
-- <mark>**Hesap, reklam, kendi sunucum yok.**</mark> Tercihlerin tarayıcında kalır.
+- <mark>**Hesap, reklam ve kendi sunucum yok.**</mark> Tercihlerin tarayıcında kalır.
 - <mark>**Resmi uyarı yok.**</mark> Can ve mal güvenliği gerektiren durumlarda Meteoroloji Genel Müdürlüğü'nün (MGM) uyarılarına bak.
 - <mark>**METAR sadece Türkiye**</mark> (LT kodlu havalimanları).
 - <mark>**Radar tabanlı kısa vade (nowcast)**</mark> MET Norway kapsamında, yani şu an esas olarak kuzey Avrupa'da. Orası dışında 15 dakikalık veri modellerden türetilir, radar kullanan servislerle yağış başlangıcında fark çıkabilir.
