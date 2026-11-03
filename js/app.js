@@ -1604,7 +1604,6 @@ fetchWeatherData().then(() => {
   const restored = applySharedView(sharedView);
   if (sharedPresentation) {
     showTab('today', false);
-    $('outlookCard').after($('selBlock'));
     $('sharedLocationName').textContent = savedLocations[$('locationSelect').selectedIndex]?.name || 'Hava durumu';
   } else if (sharedView.tab && restored) {
     showTab(sharedView.tab, false);

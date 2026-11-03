@@ -568,7 +568,9 @@ body.share-presentation #panel-settings,
 body.share-presentation #panel-today > .setting-btn { display:none !important; }
 body.share-presentation #panel-today.active { display:flex !important; flex-direction:column; }
 body.share-presentation #selBlock { display:block !important; }
+body:not(.share-presentation) #sharedHomeLink { display:none; }
 body.share-presentation .shared-heading { display:flex; flex-direction:column; gap:3px; color:var(--subtext); font-size:.9rem; }
 body.share-presentation .shared-heading strong { color:var(--ink); font-size:1.15rem; }
 body.share-presentation #heroCard { width:100%; }
 body.share-presentation #selBlock { width:100%; }
+body.share-presentation #sharedHomeLink { display:block; align-self:center; padding:12px 16px; color:var(--ink); font-weight:600; text-decoration:underline; }
