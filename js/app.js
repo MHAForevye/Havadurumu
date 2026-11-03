@@ -355,6 +355,7 @@ function updateSharedUrl() {
   const selected = win()[activeHourIndex];
   if (!selected) return;
   const url = new URL(window.location.href);
+  url.searchParams.set('view', 'share');
   url.searchParams.set('time', selected.t);
   url.searchParams.set('mode', currentMode);
   window.history.replaceState({}, '', url.pathname + url.search + url.hash);
@@ -1449,6 +1450,7 @@ async function shareCurrentView() {
   let locationData = '';
   locationBytes.forEach(byte => { locationData += String.fromCharCode(byte); });
   url.searchParams.set('p', btoa(locationData).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
+  url.searchParams.set('view', 'share');
   url.searchParams.set('time', selectedHour.t);
   url.searchParams.set('mode', currentMode);
   const activeTab = TABS.find(tab => $('panel-' + tab).classList.contains('active')) || 'today';
@@ -1525,7 +1527,7 @@ function readSharedView() {
   const mode = params.get('mode');
   return {
     locIndex,
-    isShared: params.has('p') || params.has('loc') || params.has('lat') || params.has('lon'),
+    isShared: params.get('view') === 'share' || params.has('p') || params.has('loc') || params.has('lat') || params.has('lon'),
     time: params.get('time'),
     mode: mode === 'daily' ? 'daily' : 'hourly',
     tab: TABS.includes(params.get('tab')) ? params.get('tab') : null,
