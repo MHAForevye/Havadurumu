@@ -1434,3 +1434,90 @@ let lastTab = 'today'; try { lastTab = localStorage.getItem('mk_tab') || 'today'
 if (PREFS.tab !== 'last') lastTab = PREFS.tab;
 showTab(lastTab, false);
 fetchWeatherData();
+/* ===== Paylaşılabilir Link Oluşturma ve Okuma Eklemeleri ===== */
+async function shareCurrentView() {
+  const sel = $('locationSelect');
+  if (!sel || !sel.value) return;
+
+  const locName = savedLocations[sel.selectedIndex]?.name || '';
+  const coords = sel.value; 
+  
+  const url = new URL(window.location.origin + window.location.pathname);
+  url.searchParams.set('loc', `${coords.split(',')[0]},${coords.split(',')[1]},${encodeURIComponent(locName)}`);
+  url.searchParams.set('d', activeDayIndex);
+  url.searchParams.set('h', activeHourIndex);
+
+  const hourText = String(activeHourIndex).padStart(2, '0') + ':00';
+  const dayText = activeDayIndex === 0 ? 'bugün' : `${activeDayIndex} gün sonra`;
+  const shareData = {
+    title: `Mikro-Klima: ${locName}`,
+    text: `${locName}, ${dayText} saat ${hourText} hava durumu:`,
+    url: url.toString()
+  };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+    } else {
+      await navigator.clipboard.writeText(url.toString());
+      alert('Paylaşım bağlantısı panoya kopyalandı!');
+    }
+  } catch (err) {
+    if (err.name !== 'AbortError') console.error('Paylaşım hatası:', err);
+  }
+}
+
+function readUrlParams() {
+  const params = new URLSearchParams(window.location.search);
+  const locParam = params.get('loc');
+  const dParam = params.get('d');
+  const hParam = params.get('h');
+
+  let targetIndex = -1;
+
+  if (locParam) {
+    const [latStr, lonStr, nameEnc] = locParam.split(',');
+    const lat = parseFloat(latStr);
+    const lon = parseFloat(lonStr);
+    const name = nameEnc ? decodeURIComponent(nameEnc) : 'Paylaşılan Konum';
+
+    if (isFinite(lat) && isFinite(lon)) {
+      targetIndex = savedLocations.findIndex(l => Math.abs(parseFloat(l.lat) - lat) < 0.01 && Math.abs(parseFloat(l.lon) - lon) < 0.01);
+      
+      if (targetIndex === -1) {
+        savedLocations.unshift({ name: name, lat: String(lat), lon: String(lon), alt: '' });
+        safeStore();
+        targetIndex = 0;
+      }
+    }
+  }
+
+  return {
+    locIndex: targetIndex,
+    day: dParam !== null ? parseInt(dParam, 10) : null,
+    hour: hParam !== null ? parseInt(hParam, 10) : null
+  };
+}
+
+// URL parametrelerini başlangıç akışına entegre etme
+const urlState = readUrlParams();
+let selNameInit = null;
+try { selNameInit = localStorage.getItem(SELK); } catch (e) {}
+
+const initialLocIndex = urlState.locIndex !== -1 
+  ? urlState.locIndex 
+  : Math.max(0, savedLocations.findIndex(l => l.name === selNameInit));
+
+initLocations(initialLocIndex);
+
+fetchWeatherData().then(() => {
+  if (urlState.day !== null && !isNaN(urlState.day)) {
+    selectDay(urlState.day);
+  }
+  if (urlState.hour !== null && !isNaN(urlState.hour)) {
+    selectHour(urlState.hour);
+  }
+  if (urlState.locIndex !== -1 || urlState.day !== null || urlState.hour !== null) {
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+});
