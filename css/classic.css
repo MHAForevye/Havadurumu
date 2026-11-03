@@ -1,6 +1,6 @@
 /* Klasik tema (varsayilan). data-skin="pastel" iken devre disi kalir */
-html[data-skin="classic"][data-theme] { --bg:#f1f5f9; --card-bg:#ffffff; --accent:#0284c7; --text:#0f172a; --subtext:#475569; --border:#cbd5e1; --success:#059669; --ink:#0f172a; --on-accent:#ffffff; }
-html[data-skin="classic"][data-theme="dark"] { --bg:#0f172a; --card-bg:#1e293b; --accent:#38bdf8; --text:#f8fafc; --subtext:#94a3b8; --border:#334155; --success:#34d399; --ink:#f8fafc; --on-accent:#0f172a; }
+html[data-skin="classic"][data-theme] { --bg:#f1f5f9; --card-bg:#ffffff; --accent:#0284c7; --text:#0f172a; --subtext:#475569; --border:#cbd5e1; --success:#0369a1; --ink:#0f172a; --on-accent:#ffffff; }
+html[data-skin="classic"][data-theme="dark"] { --bg:#0f172a; --card-bg:#1e293b; --accent:#38bdf8; --text:#f8fafc; --subtext:#94a3b8; --border:#334155; --success:#7dd3fc; --ink:#f8fafc; --on-accent:#0f172a; }
 html[data-skin="classic"][data-theme] body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background-color:var(--bg); background-image:none; color:var(--text); }
 html[data-skin="classic"][data-theme] h1 { color:var(--accent); text-decoration:none; }
 html[data-skin="classic"][data-theme] select, html[data-skin="classic"][data-theme] input, html[data-skin="classic"][data-theme] button { font-family:inherit; background:var(--card-bg); color:var(--text); border:1px solid var(--border); border-radius:8px; box-shadow:none; }
@@ -25,7 +25,7 @@ html[data-skin="classic"][data-theme] .hour-strip-container { background:var(--c
 html[data-skin="classic"][data-theme] .hourly-quick-box { background:rgba(100,116,139,.06); border:1px solid var(--border); }
 html[data-skin="classic"][data-theme] .matrix-scroll-area::-webkit-scrollbar-thumb, html[data-skin="classic"][data-theme] .hour-strip::-webkit-scrollbar-thumb { background:var(--border); }
 html[data-skin="classic"][data-theme] .pill { background:transparent; color:var(--text); border:1px solid var(--border); border-radius:8px; }
-html[data-skin="classic"][data-theme] .pill.ok { background:rgba(16,185,129,.18); } html[data-skin="classic"][data-theme] .pill.bad { background:rgba(239,68,68,.18); } html[data-skin="classic"][data-theme] .pill.wait { background:rgba(245,158,11,.2); }
+html[data-skin="classic"][data-theme] .pill.ok { background:rgba(100,116,139,.18); } html[data-skin="classic"][data-theme] .pill.bad { background:rgba(239,68,68,.18); } html[data-skin="classic"][data-theme] .pill.wait { background:rgba(245,158,11,.2); }
 html[data-skin="classic"][data-theme] .src-table td { background:rgba(100,116,139,.1); color:var(--text); }
 html[data-skin="classic"][data-theme] .src-table tr.cons td { background:rgba(56,189,248,.25); color:var(--text); }
 html[data-skin="classic"][data-theme] .src-table td.out { background:rgba(239,68,68,.22); }
@@ -36,7 +36,7 @@ html[data-skin="classic"][data-theme] .alert-item.warn { background:rgba(239,68,
 html[data-skin="classic"][data-theme] .out-row:hover, html[data-skin="classic"][data-theme] .out-row:focus-visible { background:rgba(100,116,139,.12); }
 html[data-skin="classic"][data-theme] .out-bar { background:rgba(100,116,139,.25); }
 html[data-skin="classic"][data-theme] .out-bar span { border:none; background:linear-gradient(90deg,#38bdf8,#f59e0b); }
-html[data-skin="classic"][data-theme] #btnGps { background:rgba(16,185,129,.18) !important; color:var(--success) !important; }
+html[data-skin="classic"][data-theme] #btnGps { background:rgba(100,116,139,.18) !important; color:var(--success) !important; }
 html[data-skin="classic"][data-theme] #btnAddLoc { background:rgba(56,189,248,.2) !important; color:var(--accent) !important; }
 html[data-skin="classic"][data-theme] #btnDelLoc { background:rgba(239,68,68,.15); color:var(--text); }
 html[data-skin="classic"][data-theme] #btnNotif.on, html[data-skin="classic"][data-theme] #btnSkin.on { background:rgba(56,189,248,.22); }
