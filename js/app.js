@@ -1427,9 +1427,14 @@ async function shareCurrentView() {
   const selectedLoc = savedLocations[sel.selectedIndex];
   const url = new URL(window.location.href);
   url.search = '';
-  url.searchParams.set('lat', selectedLoc.lat);
-  url.searchParams.set('lon', selectedLoc.lon);
-  url.searchParams.set('name', selectedLoc.name);
+  const locationBytes = new TextEncoder().encode(JSON.stringify([
+    selectedLoc.lat,
+    selectedLoc.lon,
+    selectedLoc.name
+  ]));
+  let locationData = '';
+  locationBytes.forEach(byte => { locationData += String.fromCharCode(byte); });
+  url.searchParams.set('p', btoa(locationData).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
   url.searchParams.set('time', selectedHour.t);
   url.searchParams.set('mode', currentMode);
 
@@ -1461,6 +1466,17 @@ function readSharedView() {
   const params = new URLSearchParams(window.location.search);
   let lat = params.get('lat'), lon = params.get('lon');
   let name = params.get('name');
+
+  if ((!lat || !lon) && params.has('p')) {
+    try {
+      const base64 = params.get('p').replace(/-/g, '+').replace(/_/g, '/');
+      const binary = atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, '='));
+      const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+      [lat, lon, name] = JSON.parse(new TextDecoder().decode(bytes));
+    } catch (err) {
+      console.error('Paylaşım bağlantısındaki konum okunamadı:', err);
+    }
+  }
 
   if ((!lat || !lon) && params.has('loc')) {
     const parts = params.get('loc').split(',');
@@ -1559,6 +1575,6 @@ showTab(lastTab, false);
 fetchWeatherData().then(() => {
   if (!applySharedView(sharedView)) return;
   const url = new URL(window.location.href);
-  ['lat', 'lon', 'name', 'time', 'mode', 'loc', 'd', 'h'].forEach(key => url.searchParams.delete(key));
+  ['p', 'lat', 'lon', 'name', 'time', 'mode', 'loc', 'd', 'h'].forEach(key => url.searchParams.delete(key));
   window.history.replaceState({}, '', url.pathname + url.search + url.hash);
 });
