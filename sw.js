@@ -1,7 +1,7 @@
 /* Çevrimdışı çalışma: sayfa, kütüphaneler, fontlar ve hava API cevapları önbelleğe alınır; ağ yoksa son kayıt kullanılır. */
-const V = 'mk-v7';
+const V = 'mk-v8';
 const FONTS = ['patrick-hand-latin-400', 'patrick-hand-latin-ext-400', 'bebas-neue-latin-400', 'bebas-neue-latin-ext-400', 'oswald-latin-300', 'oswald-latin-ext-300', 'oswald-latin-400', 'oswald-latin-ext-400'].map(n => 'fonts/' + n + '-normal.woff2');
-const SHELL = ['./?v=kristal-2', 'manifest.webmanifest', 'icon.png', 'badge.png', 'css/style.css?v=kristal-2', 'css/classic.css', 'css/fonts.css', 'js/app.js?v=kristal-2', 'js/kristal.js?v=kristal-2', 'lib/chart.umd.min.js', 'lib/leaflet.js', 'lib/leaflet.css', 'gizlilik.html'].concat(FONTS);
+const SHELL = ['./?v=kristal-2', 'manifest.webmanifest', 'icon.png', 'badge.png', 'css/style.css?v=kristal-2', 'css/classic.css', 'css/fonts.css', 'js/app.js?v=kristal-2', 'js/kristal.js?v=kristal-3', 'lib/chart.umd.min.js', 'lib/leaflet.js', 'lib/leaflet.css', 'gizlilik.html'].concat(FONTS);
 const API = /(open-meteo\.com|api\.met\.no|wttr\.in|api\.rainviewer\.com|raw\.githubusercontent\.com)/;
 
 self.addEventListener('install', e => {

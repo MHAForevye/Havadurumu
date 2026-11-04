@@ -12,7 +12,8 @@
     ],
     mail: ['mustafahakansunum', 'gmail.com'],    // app.js'teki gibi parçalı yazılır (botlar toplamasın)
     app: 'Astrophoto Cam',
-    key: 'mk_kristal'
+    key: 'mk_kristal',
+    owner: 'llbha0uxr6'                          // gizli kelimenin özeti (kelimenin kendisi kodda yazmaz)
   };
 
   var $ = function (id) { return document.getElementById(id); };
@@ -38,10 +39,10 @@
   function clean(o) {
     var n = function (v) { v = Math.floor(Number(v)); return isFinite(v) && v >= 0 && v < 1e9 ? v : 0; };
     var dt = function (v) { return /^\d{4}-\d{2}-\d{2}$/.test(String(v)) ? String(v) : ''; };
-    var s = { id: '', bal: 0, earned: 0, spent: 0, days: 0, first: '', last: '', cam: '', reqs: [], pending: '' };
+    var s = { id: '', bal: 0, earned: 0, gift: 0, spent: 0, days: 0, first: '', last: '', cam: '', reqs: [], pending: '' };
     if (o && typeof o === 'object') {
       s.id = /^\d{8}$/.test(String(o.id)) ? String(o.id) : '';
-      s.bal = n(o.bal); s.earned = n(o.earned); s.spent = n(o.spent); s.days = n(o.days);
+      s.bal = n(o.bal); s.earned = n(o.earned); s.gift = n(o.gift); s.spent = n(o.spent); s.days = n(o.days);
       s.first = dt(o.first); s.last = dt(o.last);
       s.cam = String(o.cam || '').slice(0, 60);
       if (Array.isArray(o.reqs)) {
@@ -64,6 +65,23 @@
     if (!S.first) S.first = t;
     save();
     return CFG.daily;
+  }
+
+  /* ===== Gizli hediye bölümü (sadece sana özel) =====
+     Astrophoto Cam ID kutusuna gizli kelimeyi yazınca açılır; kelime kutudan hemen silinir. */
+  function h53(str) {
+    var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (var i = 0, ch; i < str.length; i++) { ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+  }
+  function isOwnerWord(v) { return h53('mk|' + String(v).trim().toLocaleLowerCase('tr').replace(/\u0131/g, 'i')) === CFG.owner; }   // HEDIYE / Hediye / hediye hepsi olur
+  function giftAdd() {
+    var n = Math.floor(Number(String($('kGiftAmt').value).replace(/\s/g, '').replace(',', '.')));
+    if (!isFinite(n) || n < 1 || n > 100000) return toast('1 ile 100000 arasında bir sayı yaz.');
+    S.bal += n; S.gift += n; save(); render();
+    toast('+' + n + ' kristal eklendi. Bakiye: ' + S.bal);
   }
 
   /* ===== Küçük bildirim ===== */
@@ -90,7 +108,7 @@
       CFG.app + " ID'm: " + r.cam, '',
       'Talep no: ' + r.no,
       'Talep zamanı: ' + r.t,
-      'Giriş günü: ' + S.days + ' (kazanılan ' + S.earned + ', harcanan ' + S.spent + ', kalan ' + S.bal + ')', '',
+      'Giriş günü: ' + S.days + ' (giriş ödülü ' + S.earned + ', hediye ' + S.gift + ', harcanan ' + S.spent + ', kalan ' + S.bal + ')', '',
       'Doğrulayıp aktivasyon kodumu gönderebilir misiniz? Gerekirse ekran görüntüsünü bu maile ekleyeceğim.'
     ].join('\r\n');
   }
@@ -119,7 +137,7 @@
     $('kBal').textContent = S.bal;
     $('kId').textContent = S.id;
     if (document.activeElement !== $('kCamId')) $('kCamId').value = S.cam;
-    $('kToday').textContent = (S.last === today() ? 'Bugünkü giriş ödülün alındı (+' + CFG.daily + '). ' : '') + 'Toplam giriş günü: ' + S.days + '.';
+    $('kToday').textContent = (S.last === today() ? 'Bugünkü giriş ödülün alındı (+' + CFG.daily + '). ' : '') + 'Toplam giriş günü: ' + S.days + '.' + (S.gift ? ' Hediye kristal: ' + S.gift + '.' : '');
 
     var box = $('kPacks'); box.textContent = '';
     CFG.packs.forEach(function (pk, i) {
@@ -160,7 +178,7 @@
     p.classList.add('show'); p.scrollTop = 0; document.body.style.overflow = 'hidden'; $('storeBack').focus();
   }
   function closeStore() {
-    $('storePage').classList.remove('show'); document.body.style.overflow = '';
+    $('storePage').classList.remove('show'); document.body.style.overflow = ''; $('kOwner').hidden = true;
     var b = $('btnStore'); if (b) b.focus();
   }
 
@@ -187,6 +205,14 @@
     $('btnStore').addEventListener('click', openStore);
     $('storeBack').addEventListener('click', closeStore);
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && $('storePage').classList.contains('show')) closeStore(); });
+    $('kCamId').addEventListener('input', function () {
+      if (!isOwnerWord(this.value)) return;
+      this.value = ''; S.cam = ''; save();
+      $('kOwner').hidden = false;
+      $('kOwner').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    $('kGiftAdd').addEventListener('click', giftAdd);
+    $('kGiftClose').addEventListener('click', function () { $('kOwner').hidden = true; });
     $('kCamId').addEventListener('change', function () { S.cam = this.value.trim().slice(0, 60); save(); });
     $('kCopyId').addEventListener('click', function () { copy(S.id, 'ID kopyalandı: ' + S.id); });
     $('kMailAgain').addEventListener('click', function () { var r = pendingReq(); if (r) openMail(r); });
