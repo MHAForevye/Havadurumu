@@ -8,9 +8,9 @@ Forevye tarafından geliştirildi, yani ben.
 
 ## <img src="docs/h-02.svg" alt="Bu proje neden var">
 
-Hobim fotoğrafçılık. Doğru ışık için, yağmurun tam ne zaman başlayıp biteceğini bilmek benim için önemli. Denediğim hava durumu uygulamaları iyi işler yapıyordu ama bu ihtiyaç için bana yetmedi. Kimseyi kötülemek gibi bir niyetim yok, hepsi kendi alanında gayet iyi. Ben sadece "birkaç kaynağa aynı anda baksam, hangisine ne kadar güvenebileceğimi görsem" dedim.
+Hobilerimden biri fotoğrafçılık. Türkçe karşılığı olan "uğraş" kelimesini kullanmayı daha çok sevsem de, bunun ikinci bir meslek gibi algılanmaması adına hobi demeyi tercih ediyorum. Doğru ışık için, yağmurun tam ne zaman başlayıp biteceğini bilmek benim için önemli. Denediğim hava durumu uygulamaları genel olarak gayet iyi işler yapıyor; kimseyi kötülemek gibi bir niyetim yok, hepsi kendi alanında başarılı. Neyse, benim bu konudaki ihtiyacım bunlarla tam anlamıyla karşılanmadı. Ben sadece "Birkaç kaynağa aynı anda baksam, hangisine ne kadar güvenebileceğimi görsem" dedim ve bu projeyi şekillendirdim.
 
-Yazmaya iki yağmurlu günde başladım. Sonraki güneşli günlerde eklemeler yaptım, ortaya bu çıktı.
+Yazmaya iki yağmurlu günde başladım. Sonraki güneşli günlerde eklemeler yaptım, ortaya böyle bir sonuç çıktı.
 
 Üç şeye dikkat ettim:
 
