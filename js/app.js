@@ -1179,7 +1179,7 @@ $('prefHot').addEventListener('change', () => readNum('prefHot', 'hot'));
 $('prefCold').addEventListener('change', () => readNum('prefCold', 'cold'));
 $('prefGust').addEventListener('change', () => readNum('prefGust', 'gust'));
 $('btnBackup').addEventListener('click', async () => {
-  const txt = JSON.stringify({ mk: 1, locs: savedLocations, prefs: PREFS, theme: curTheme(), skin: curSkin() });
+  const txt = JSON.stringify({ mk: 1, locs: savedLocations, prefs: PREFS, theme: curTheme(), skin: curSkin(), kr: window.MKKristal ? MKKristal.exportData() : undefined });
   try { await navigator.clipboard.writeText(txt); alert('Yedek kopyalandı.'); }
   catch (e) { prompt('Kopyalama izni yok. Bu metni elle kopyala:', txt); }
 });
@@ -1193,7 +1193,9 @@ $('btnRestore').addEventListener('click', () => {
     safeStore(); PREFS = sanePrefs(o.prefs); savePrefs(); applyFont(); fillPrefs(); scheduleRefresh();
     if (o.theme === 'dark' || o.theme === 'light') setTheme(o.theme, true);
     if (o.skin === 'pastel' || o.skin === 'classic') setSkin(o.skin, true);
-    initLocations(0); fetchWeatherData(); alert('Yedek yüklendi.');
+    initLocations(0); fetchWeatherData();
+    if (o.kr && window.MKKristal) MKKristal.importData(o.kr);
+    alert('Yedek yüklendi.');
   } catch (e) { alert('Yedek okunamadı.'); }
 });
 fillPrefs();
@@ -1386,7 +1388,7 @@ function memImport(inp) { const f = inp.files[0]; if (!f) return; f.text().then(
 function memReset() { if (!confirm('Kendi karne belleği silinsin mi?')) return; MEM = { locs: {} }; memSave(); memRender(); scheduleFuse(); }
 
 /* ===== Gerçek ölçüm: en yakın havalimanı METAR (GitHub Actions'ın hazırladığı Türkiye JSON'u) ===== */
-const METAR_URL = 'https://raw.githubusercontent.com/MustafaHakanAlkas/Havadurumu/metar-data/metar-tr.json';   // örn: 'https://raw.githubusercontent.com/KULLANICI/DEPO/metar-data/metar-tr.json'
+const METAR_URL = 'https://raw.githubusercontent.com/MHAForevye/MikroKlimaKontrolMerkezi/metar-data/metar-tr.json';   // örn: 'https://raw.githubusercontent.com/KULLANICI/DEPO/metar-data/metar-tr.json'
 let MT = null, MTT = 0;
 const kmBetween = (a, b, c, d) => { const r = Math.PI / 180, x = Math.sin((c - a) * r / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin((d - b) * r / 2) ** 2; return 12742 * Math.asin(Math.sqrt(x)); };
 async function mtFetch() {
