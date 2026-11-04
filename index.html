@@ -23,7 +23,11 @@
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Mikro-Klima skoru nedir?", "acceptedAnswer": {"@type": "Answer", "text": "Mikro-Klima skoru, seçtiğin saat veya gün için yağış potansiyelini ve atmosferik gerilimi 0 ile 10 arasında tek bir sayıyla gösterir. Sıcaklık, nem, basınç, rüzgâr ve model yağışı gibi verilerden hesaplanır. Skor yükseldikçe yağış ve sağanak ihtimali artar. Formülün ayrıntısı uygulamadaki Detay sekmesinde, skorun yanındaki bilgi penceresinde yer alır. Bu skor uygulamaya özgü sezgisel bir formüldür; bilimsel olarak doğrulanmış bir indeks ya da resmi uyarı değildir."}}, {"@type": "Question", "name": "METAR nedir, uygulamada ne işe yarar?", "acceptedAnswer": {"@type": "Answer", "text": "METAR, havalimanlarında yapılan gerçek hava ölçümlerinin uluslararası standart formatıdır; sıcaklık, rüzgâr, basınç ve görüş gibi bilgileri içerir. Mikro-Klima Kontrol Merkezi, konumuna en yakın havalimanının METAR ölçümünü gösterir. Böylece modellerin tahmin ettiği değerle gerçekte ölçülen değeri yan yana görebilirsin. Veriler aviationweather.gov kaynağından alınır."}}, {"@type": "Question", "name": "Yağış radarı nasıl okunur?", "acceptedAnswer": {"@type": "Answer", "text": "Radar, yağmur bulutlarının yerini renklerle gösterir. Mavi hafif yağışı, sarı ve turuncu orta şiddeti, kırmızı yoğun yağışı ifade eder. Uygulama RainViewer verisiyle son 2 saatin görüntüsünü gösterir ve yaklaşık 10 dakikada bir yenilenir. Radar gelecek tahmini yapmaz; bulutların hareket yönüne bakarak yağışın sana ulaşıp ulaşmayacağını yorumlayabilirsin. Radar kapsamı dışındaki yerler boş görünür."}}, {"@type": "Question", "name": "Hangi hava tahmin modelleri kullanılıyor, hangisi daha doğru?", "acceptedAnswer": {"@type": "Answer", "text": "Uygulama birçok kaynaktan tahmin alır: Open-Meteo üzerinden 12 ayrı hava modeli (ECMWF, GFS, ICON, Météo-France vb.), ayrıca MET Norway ve wttr.in servisleri. Hepsini Kaynaklar sekmesinde karşılaştırır. Her model için 6 ve 24 saat sonrası tahmin cihazına kaydedilir, zamanı gelince gerçekleşenle kıyaslanır. Böylece kendi konumunda hangi modelin daha az hata yaptığını görürsün. Bu kayıtlar sadece tarayıcında saklanır."}}, {"@type": "Question", "name": "Uygulama ücretsiz mi, kurmam gerekiyor mu?", "acceptedAnswer": {"@type": "Answer", "text": "Ücretsiz ve reklamsızdır. Tarayıcıdan açabilirsin; menüden Ana ekrana ekle dersen uygulama gibi çalışır ve internet yokken son kaydedilen verileri gösterir. Resmi hava uyarıları için her zaman Meteoroloji Genel Müdürlüğü (MGM) sayfasına bakmalısın."}}]}</script>
   <meta name="theme-color" content="#fdf1dc">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Mikro-Klima">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <script>(function(){var t=null;try{t=localStorage.getItem("mk_theme")}catch(e){}if(!t)t=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";document.documentElement.setAttribute("data-theme",t);var k=null;try{k=localStorage.getItem("mk_skin")}catch(e){}document.documentElement.setAttribute("data-skin",k==="pastel"?"pastel":"classic");})();</script>
@@ -278,6 +282,7 @@
     </section>
   </main>
   <div class="credit-line"><button type="button" id="btnCredit">Forevye tarafından geliştirildi</button><a href="gizlilik.html">Gizlilik politikası</a></div>
+  <p class="credit-line" style="font-size:11px;opacity:.65;margin-top:4px">Veriler: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> (CC BY 4.0), <a href="https://www.met.no/" target="_blank" rel="noopener">MET Norway</a> (CC BY 4.0), <a href="https://aviationweather.gov/" target="_blank" rel="noopener">NOAA Aviation Weather</a> (METAR), <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>, <a href="https://wttr.in/" target="_blank" rel="noopener">wttr.in</a></p>
 </div>
 
 <nav class="tabbar" aria-label="Bölümler">
@@ -410,7 +415,7 @@
   </div>
 </div>
 
-<script src="js/app.js?v=kristal-2"></script>
+<script src="js/app.js?v=kristal-3"></script>
 <script src="js/kristal.js?v=kristal-7"></script>
 </body>
 </html>
