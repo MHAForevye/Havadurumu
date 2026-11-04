@@ -115,12 +115,11 @@
 
   /* ===== Ekran ===== */
   function render() {
-    if (!$('storeCard')) return;
-    $('kBarBal').textContent = S.bal;
-    $('kBarId').textContent = 'ID ' + S.id;
+    if (!$('storePage')) return;
     $('kBal').textContent = S.bal;
     $('kId').textContent = S.id;
     if (document.activeElement !== $('kCamId')) $('kCamId').value = S.cam;
+    $('kToday').textContent = (S.last === today() ? 'Bugünkü giriş ödülün alındı (+' + CFG.daily + '). ' : '') + 'Toplam giriş günü: ' + S.days + '.';
 
     var box = $('kPacks'); box.textContent = '';
     CFG.packs.forEach(function (pk, i) {
@@ -146,8 +145,8 @@
     if (pr) $('kPendingTx').textContent = 'Bekleyen talep: ' + pr.pack + ' · Talep no ' + pr.no + '. Mail taslağı açılmadıysa aşağıdaki düğmeleri kullan; kristalin zaten düşüldü.';
 
     var h = $('kHist'); h.textContent = '';
+    $('kHistWrap').style.display = S.reqs.length ? '' : 'none';
     if (S.reqs.length) {
-      var t = document.createElement('b'); t.textContent = 'Son talepler'; h.appendChild(t);
       S.reqs.slice(-5).reverse().forEach(function (r) {
         var d = document.createElement('div'); d.textContent = r.t + ' · ' + r.pack + ' · ' + r.cost + ' kristal · #' + r.no; h.appendChild(d);
       });
@@ -155,23 +154,39 @@
     if (typeof paintIcons === 'function') paintIcons();
   }
 
+  /* ===== Mağaza sayfası (Forevye sayfası gibi tam ekran açılır) ===== */
+  function openStore() {
+    var p = $('storePage'); render();
+    p.classList.add('show'); p.scrollTop = 0; document.body.style.overflow = 'hidden'; $('storeBack').focus();
+  }
+  function closeStore() {
+    $('storePage').classList.remove('show'); document.body.style.overflow = '';
+    var b = $('btnStore'); if (b) b.focus();
+  }
+
   /* ===== Bağlantılar ===== */
   function init() {
     if (typeof ICONS !== 'undefined') {
-      ICONS.gem = '<path d="M13 8h22l8 11-19 22L5 19z" fill="#7dd3fc"/><path d="M13 8h22l-5 11H18z" fill="#e0f2fe" stroke-width="2.2"/><path d="M5 19h13l6 22z" fill="#38bdf8" stroke-width="2.2"/><path d="M43 19H30l-6 22z" fill="#0ea5e9" stroke-width="2.2"/><path d="M18 19h12l-6 22z" fill="#7dd3fc" stroke-width="2.2"/><path d="M12 14l3-4" fill="none" stroke="#fff" stroke-width="3"/><path d="M40 4v7M36.5 7.5h7" fill="none" stroke="#fde047" stroke-width="3"/>';
+      ICONS.gem =
+        '<path d="M14 6h20l10 12-20 26L4 18z" fill="#7dd3fc"/>' +
+        '<path d="M14 6h20l10 12H4z" fill="#e0f2fe" stroke-width="2.4"/>' +
+        '<path d="M19 6l-3 12M29 6l3 12" fill="none" stroke-width="2.2"/>' +
+        '<path d="M10 14l2-3" fill="none" stroke="#fff" stroke-width="3"/>' +
+        '<circle cx="15" cy="28" r="2.4" fill="#f9a8d4" stroke="none"/><circle cx="33" cy="28" r="2.4" fill="#f9a8d4" stroke="none"/>' +
+        '<circle cx="19.5" cy="25" r="1.9" fill="#4a3426" stroke="none"/><circle cx="28.5" cy="25" r="1.9" fill="#4a3426" stroke="none"/>' +
+        '<path d="M21 30q3 3.2 6 0" fill="none" stroke-width="2.4"/>' +
+        '<path d="M43 2.5v7M39.5 6h7" fill="none" stroke="#fde047" stroke-width="3"/>';
       if (typeof BG !== 'undefined') BG.gem = '#7dd3fc';
     }
     S = load();
     if (!S.id) { S.id = newId(); save(); }
-    var got = daily();
+    daily();                       // ödül sessizce işlenir; sadece Mağaza sayfasında görünür
     render();
-    if (got) toast('Günlük giriş: +' + got + ' kristal');
 
-    if (!$('storeCard')) return;
-    $('kBar').addEventListener('click', function () {
-      showTab('settings');
-      setTimeout(function () { $('storeCard').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
-    });
+    if (!$('storePage')) return;
+    $('btnStore').addEventListener('click', openStore);
+    $('storeBack').addEventListener('click', closeStore);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && $('storePage').classList.contains('show')) closeStore(); });
     $('kCamId').addEventListener('change', function () { S.cam = this.value.trim().slice(0, 60); save(); });
     $('kCopyId').addEventListener('click', function () { copy(S.id, 'ID kopyalandı: ' + S.id); });
     $('kMailAgain').addEventListener('click', function () { var r = pendingReq(); if (r) openMail(r); });
@@ -182,7 +197,7 @@
     $('kMailDone').addEventListener('click', function () { S.pending = ''; save(); render(); });
     document.addEventListener('visibilitychange', function () {   // sekme gün değişiminden sonra açılırsa ödül ver
       if (document.visibilityState !== 'visible') return;
-      var g = daily(); render(); if (g) toast('Günlük giriş: +' + g + ' kristal');
+      daily(); render();
     });
   }
 

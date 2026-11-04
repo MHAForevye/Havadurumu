@@ -28,7 +28,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <script>(function(){var t=null;try{t=localStorage.getItem("mk_theme")}catch(e){}if(!t)t=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";document.documentElement.setAttribute("data-theme",t);var k=null;try{k=localStorage.getItem("mk_skin")}catch(e){}document.documentElement.setAttribute("data-skin",k==="pastel"?"pastel":"classic");})();</script>
   
-  <link rel="stylesheet" href="css/fonts.css"><link rel="stylesheet" href="css/style.css?v=kristal-1"><link rel="stylesheet" href="css/classic.css">
+  <link rel="stylesheet" href="css/fonts.css"><link rel="stylesheet" href="css/style.css?v=kristal-2"><link rel="stylesheet" href="css/classic.css">
   <script src="lib/chart.umd.min.js"></script>
 <script data-goatcounter="https://havadurumu.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -49,7 +49,6 @@
       <span class="ico" data-ico="pin" style="--s:24px" aria-hidden="true"></span>
       <select id="locationSelect" aria-label="Konum"></select>
     </div>
-    <button type="button" id="kBar" class="k-bar" aria-label="Kristal bakiyesi ve mağaza"><span class="ico" data-ico="gem" style="--s:22px"></span><b id="kBarBal">0</b><span>kristal</span><span class="k-sep">·</span><span id="kBarId">ID --------</span></button>
   </header>
 
   <main>
@@ -261,26 +260,9 @@
       <p class="hint" style="margin:10px 0 0">Yedek; konumlarını, bu ayarları ve kristallerini tek metin olarak kopyalar. Başka cihazda "Yedekten yükle" ile yapıştır.</p>
     </div>
 
-      <div class="card wide" id="storeCard">
+      <div class="card wide">
         <h2 class="card-title">Mağaza</h2>
-        <div class="k-stat">
-          <div><div class="param-label">Kristal bakiyen</div><div class="k-big"><span id="kBal">0</span><span class="ico k-gem" data-ico="gem" style="--s:30px"></span></div></div>
-          <div style="text-align:right"><div class="param-label">Site ID'n</div><div class="k-big k-id" id="kId">--------</div><button type="button" id="kCopyId" class="k-mini">Kopyala</button></div>
-        </div>
-        <p class="hint">Siteyi her gün açtığında +30 kristal kazanırsın. Kristalle Astrophoto Cam için aktivasyon kodu talep edebilirsin; kod, doğrulamadan sonra mail ile gönderilir.</p>
-        <div class="pref-row"><label for="kCamId">Astrophoto Cam ID'n<small>mail taslağına yazılır</small></label>
-          <input type="text" id="kCamId" maxlength="60" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ID"></div>
-        <div class="stack" id="kPacks"></div>
-        <p class="hint" id="kLow" style="margin:8px 0 0" hidden>Yetersiz kristal! Günlük giriş yaparak kristal biriktirmeye devam et.</p>
-        <div class="k-pending" id="kPending" hidden>
-          <p class="hint" id="kPendingTx" style="margin:0 0 8px"></p>
-          <div class="stack">
-            <button type="button" id="kMailAgain" class="setting-btn">Maili tekrar aç</button>
-            <button type="button" id="kMailCopy" class="setting-btn">Mail metnini kopyala</button>
-            <button type="button" id="kMailDone" class="setting-btn">Talebi gönderdim, gizle</button>
-          </div>
-        </div>
-        <div class="src-stats" id="kHist"></div>
+        <button id="btnStore" class="setting-btn"><span class="ico" data-ico="gem" style="--s:22px"></span>Mağazayı aç</button>
       </div>
 
       <div class="card wide">
@@ -349,6 +331,50 @@
   </div>
 </div>
 
+<div class="studio-page" id="storePage" role="dialog" aria-modal="true" aria-label="Mağaza">
+  <div class="studio-inner">
+    <button type="button" class="studio-back" id="storeBack"><span class="ico" data-ico="arrow" style="--s:22px;transform:rotate(90deg)"></span>Geri</button>
+
+    <div class="studio-hero">
+      <span class="ico" data-ico="gem"></span>
+      <h2 class="sh-title">Mağaza</h2>
+      <p class="studio-sub">Siteyi her gün açtığında <b>30 kristal</b> kazanırsın. Kristallerle Astrophoto Cam için aktivasyon kodu alabilirsin.</p>
+    </div>
+
+    <h3 class="studio-sec">Hesabım</h3>
+    <div class="card studio-card">
+      <div class="k-stat">
+        <div><div class="param-label">Kristal bakiyen</div><div class="k-big"><span id="kBal">0</span><span class="ico k-gem" data-ico="gem" style="--s:34px"></span></div></div>
+        <div style="text-align:right"><div class="param-label">Site ID'n</div><div class="k-big k-id" id="kId">--------</div><button type="button" id="kCopyId" class="k-mini">Kopyala</button></div>
+      </div>
+      <div class="src-stats" id="kToday"></div>
+    </div>
+
+    <h3 class="studio-sec">Aktivasyon paketleri</h3>
+    <div class="card studio-card">
+      <div class="pref-row"><label for="kCamId">Astrophoto Cam ID'n<small>mail taslağına yazılır</small></label>
+        <input type="text" id="kCamId" maxlength="60" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ID"></div>
+      <div class="stack" id="kPacks" style="margin-top:10px"></div>
+      <p class="hint" id="kLow" style="margin:10px 0 0" hidden>Yetersiz kristal! Günlük giriş yaparak kristal biriktirmeye devam et.</p>
+      <div class="k-pending" id="kPending" hidden>
+        <p class="hint" id="kPendingTx" style="margin:0 0 8px"></p>
+        <div class="stack">
+          <button type="button" id="kMailAgain" class="setting-btn">Maili tekrar aç</button>
+          <button type="button" id="kMailCopy" class="setting-btn">Mail metnini kopyala</button>
+          <button type="button" id="kMailDone" class="setting-btn">Talebi gönderdim, gizle</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="kHistWrap" style="display:none">
+      <h3 class="studio-sec">Son talepler</h3>
+      <div class="card studio-card"><div class="src-stats" id="kHist" style="margin:0"></div></div>
+    </div>
+
+    <p class="studio-foot">Paketi aldığında mail taslağı açılır. Kod, doğrulamadan sonra mail ile gönderilir.</p>
+  </div>
+</div>
+
 <div class="info-overlay" id="infoOverlay">
   <div class="info-sheet" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
     <div class="info-sheet-head"><b id="infoTitle">Bilgilendirme</b></div>
@@ -358,7 +384,7 @@
   </div>
 </div>
 
-<script src="js/app.js?v=kristal-1"></script>
-<script src="js/kristal.js?v=kristal-1"></script>
+<script src="js/app.js?v=kristal-2"></script>
+<script src="js/kristal.js?v=kristal-2"></script>
 </body>
 </html>
