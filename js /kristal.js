@@ -237,6 +237,7 @@
   /* ===== Ekran ===== */
   function render() {
     if (!$('storePage')) return;
+    if ($('kVer')) $('kVer').textContent = 'kristal.js v7 yüklü';
     $('kBal').textContent = S.bal;
     $('kId').textContent = S.id;
     if (document.activeElement !== $('kCamId')) $('kCamId').value = S.cam;
