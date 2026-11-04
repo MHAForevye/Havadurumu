@@ -1,4 +1,4 @@
-/* Kristal ödül sistemi: günlük giriş + Mağaza (Astrophoto Cam aktivasyon talebi).
+/* Kristal ödül sistemi: günlük giriş + Mağaza (Astrophoto Cam aktivasyon talebi) + hediye kodu.
    Sunucu yok: her şey bu cihazda, localStorage'da durur. Kod talebi mail ile yapılır.
    Fiyatları, günlük ödülü ya da mail adresini değiştirmek için sadece aşağıdaki CFG bloğunu düzenle. */
 (function () {
@@ -39,7 +39,7 @@
   function clean(o) {
     var n = function (v) { v = Math.floor(Number(v)); return isFinite(v) && v >= 0 && v < 1e9 ? v : 0; };
     var dt = function (v) { return /^\d{4}-\d{2}-\d{2}$/.test(String(v)) ? String(v) : ''; };
-    var s = { id: '', bal: 0, earned: 0, gift: 0, spent: 0, days: 0, first: '', last: '', cam: '', reqs: [], pending: '' };
+    var s = { id: '', bal: 0, earned: 0, gift: 0, spent: 0, days: 0, first: '', last: '', cam: '', reqs: [], pending: '', used: [], codes: [], made: [], v: 0, sig: '' };
     if (o && typeof o === 'object') {
       s.id = /^\d{8}$/.test(String(o.id)) ? String(o.id) : '';
       s.bal = n(o.bal); s.earned = n(o.earned); s.gift = n(o.gift); s.spent = n(o.spent); s.days = n(o.days);
@@ -51,11 +51,38 @@
         });
       }
       s.pending = String(o.pending || '').slice(0, 12);
+      s.v = n(o.v); s.sig = String(o.sig || '').replace(/[^a-z0-9]/g, '').slice(0, 16);
+      if (Array.isArray(o.used)) s.used = o.used.map(function (c) { return String(c).slice(0, 16); }).filter(function (c) { return /^[A-Z2-9]{13}$/.test(c); }).slice(-300);
+      if (Array.isArray(o.codes)) {
+        s.codes = o.codes.filter(function (r) { return r && typeof r === 'object' && /^[A-Z2-9]{13}$/.test(String(r.c)); }).slice(-30).map(function (r) {
+          return { c: String(r.c), n: n(r.n), t: String(r.t || '').slice(0, 16) };
+        });
+      }
+      if (Array.isArray(o.made)) {
+        s.made = o.made.filter(function (r) { return r && typeof r === 'object' && /^[A-Z2-9]{13}$/.test(String(r.c)); }).slice(-20).map(function (r) {
+          return { to: /^\d{8}$/.test(String(r.to)) ? String(r.to) : '', n: n(r.n), c: String(r.c), t: String(r.t || '').slice(0, 16) };
+        });
+      }
     }
     return s;
   }
-  function load() { try { return clean(JSON.parse(localStorage.getItem(CFG.key))); } catch (e) { return clean(null); } }
-  function save() { try { localStorage.setItem(CFG.key, JSON.stringify(S)); } catch (e) {} }
+  /* Kayıt imzası: bakiye/hediye/harcama/kodlar değişirse imza tutmaz. Kaynak kodu okuyan biri yine taklit edebilir
+     (sunucu yok), ama F12'de sayıyı değiştirmek artık kristali sıfırlar. */
+  function sign(s) {
+    return h53('st|' + [s.id, s.days, s.earned, s.gift, s.spent, s.bal, s.first, s.last, s.codes.map(function (c) { return c.c + ':' + c.n; }).join(',')].join('|') + '|' + CFG.owner);
+  }
+  function valid(s) { return (s.v < 2 || s.sig === sign(s)) && s.earned + s.gift === s.spent + s.bal; }
+  var tampered = false;
+  function load() {
+    var s;
+    try { s = clean(JSON.parse(localStorage.getItem(CFG.key))); } catch (e) { return clean(null); }
+    if (!valid(s)) {                // değiştirilmiş kayıt: kristaller sıfırlanır, kullanılmış kodlar kalır (tekrar kullanılamasın)
+      tampered = true;
+      s.bal = s.earned = s.gift = s.spent = s.days = 0; s.codes = []; s.pending = ''; s.last = ''; s.first = '';
+    }
+    return s;
+  }
+  function save() { try { S.v = 2; S.sig = sign(S); localStorage.setItem(CFG.key, JSON.stringify(S)); } catch (e) {} }
 
   /* ===== Günlük giriş ödülü ===== */
   function daily() {
@@ -69,14 +96,82 @@
 
   /* ===== Gizli hediye bölümü (sadece sana özel) =====
      Astrophoto Cam ID kutusuna gizli kelimeyi yazınca açılır; kelime kutudan hemen silinir. */
-  function h53(str) {
+  function h53n(str) {
     var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
     for (var i = 0, ch; i < str.length; i++) { ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
     h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
     h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+    return 4294967296 * (2097151 & h2) + (h1 >>> 0);
   }
+  function h53(str) { return h53n(str).toString(36); }
   function isOwnerWord(v) { return h53('mk|' + String(v).trim().toLocaleLowerCase('tr').replace(/\u0131/g, 'i')) === CFG.owner; }   // HEDIYE / Hediye / hediye hepsi olur
+  /* ===== Hediye kodu (ID'ye ve miktara bağlı, tek kullanımlık) =====
+     Kod = 4 karakter rastgele (nonce) + 4 karakter miktar + 5 karakter imza. İmza; ID, miktar ve nonce'dan çıkar.
+     Başka ID'de ya da değiştirilmiş miktarla tutmaz. Kullanılan kodlar alıcının cihazında kayıtlı kalır, ikinci kez kabul edilmez. */
+  var AB = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';   // 0/O ve 1/I karışmasın diye çıkarıldı
+  function enc(v, len) { var s = ''; for (var i = 0; i < len; i++) { s = AB.charAt(v % 32) + s; v = Math.floor(v / 32); } return s; }
+  function dec(s) { var v = 0; for (var i = 0; i < s.length; i++) { var k = AB.indexOf(s.charAt(i)); if (k < 0) return -1; v = v * 32 + k; } return v; }
+  function makeCode(id, n, nonce) { return nonce + enc(n, 4) + enc(h53n('gift|' + id + '|' + n + '|' + nonce + '|' + CFG.owner) % 33554432, 5); }
+  function normCode(v) { return String(v).toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+  function fmtCode(c) { return c.slice(0, 4) + '-' + c.slice(4, 8) + '-' + c.slice(8); }
+  function giftMake() {
+    var to = String($('kGiftTo').value).replace(/\D/g, '');
+    if (!/^\d{8}$/.test(to)) return toast("Arkadaşının Site ID'si 8 haneli bir sayı olmalı.");
+    var n = Math.floor(Number(String($('kGiftAmt').value).replace(/\s/g, '').replace(',', '.')));
+    if (!isFinite(n) || n < 1 || n > 100000) return toast('1 ile 100000 arasında bir sayı yaz.');
+    var a = rnd(4), nonce = '';
+    for (var i = 0; i < 4; i++) nonce += AB.charAt(a[i] % 32);
+    var c = makeCode(to, n, nonce);
+    S.made.push({ to: to, n: n, c: c, t: stamp() }); S.made = S.made.slice(-20); save(); render();
+    $('kGiftOut').textContent = fmtCode(c);
+    copy(fmtCode(c), 'Kod üretildi ve kopyalandı: ' + fmtCode(c) + ' (' + n + ' kristal, ID ' + to + ')');
+  }
+  function giftRedeem() {
+    var c = normCode($('kCode').value);
+    if (c.length !== 13) return toast('Kod XXXX-XXXX-XXXXX biçiminde (13 harf/rakam).');
+    var n = dec(c.slice(4, 8));
+    if (n < 1 || n > 100000 || makeCode(S.id, n, c.slice(0, 4)) !== c) return toast("Kod geçersiz ya da bu ID'ye ait değil.");
+    if (S.used.indexOf(c) >= 0) return toast('Bu kod daha önce kullanılmış.');
+    S.used.push(c); S.used = S.used.slice(-300);
+    S.codes.push({ c: c, n: n, t: stamp() }); S.codes = S.codes.slice(-30);
+    S.bal += n; S.gift += n; save(); render();
+    $('kCode').value = '';
+    toast('+' + n + ' kristal hediye edildi! Bakiye: ' + S.bal);
+  }
+  /* ===== Mail doğrulama kodu =====
+     Maile kodlanmış + imzalı bir satır eklenir: MK1.<veri>.<imza>. Gizli bölümde maili yapıştırınca imza, ID, hediye kodları
+     ve toplamlar kontrol edilir. Maildeki düz yazı değiştirilse bile imzalı veri değişmez. */
+  function b64e(s) { return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  function b64d(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return atob(s); }
+  function proof(r) {
+    var P = [S.id, S.days, S.earned, S.gift, S.spent, S.bal, r.no, r.cost, S.codes.map(function (c) { return c.c; }).join(',')].join('|');
+    return 'MK1.' + b64e(P) + '.' + h53('sig|' + P + '|' + CFG.owner);
+  }
+  function verifyMail(text) {
+    var m = /MK1\.([A-Za-z0-9_-]+)\.([a-z0-9]+)/.exec(String(text)), bad = [], info = [], P;
+    if (!m) return 'ŞÜPHELİ: Doğrulama satırı (MK1...) bulunamadı. Silinmiş ya da elle yazılmış olabilir.';
+    try { P = b64d(m[1]); } catch (e) { return 'ŞÜPHELİ: Doğrulama satırı bozuk.'; }
+    if (h53('sig|' + P + '|' + CFG.owner) !== m[2]) return 'ŞÜPHELİ: İmza geçersiz. Veriler değiştirilmiş.';
+    var a = P.split('|'), id = a[0], days = +a[1], earned = +a[2], gift = +a[3], spent = +a[4], bal = +a[5], no = a[6], cost = +a[7];
+    var codes = a[8] ? a[8].split(',') : [], sum = 0, seen = {};
+    info.push('ID ' + id + ' · talep #' + no + ' · ' + cost + ' kristal');
+    info.push('Giriş günü ' + days + ', giriş ödülü ' + earned + ', hediye ' + gift + ', harcanan ' + spent + ', kalan ' + bal);
+    if (earned + gift !== spent + bal) bad.push('Denklem tutmuyor: giriş ödülü + hediye ≠ harcanan + kalan');
+    if (earned > days * CFG.daily) bad.push('Giriş ödülü (' + earned + ') gün sayısına göre en fazla ' + days * CFG.daily + ' olabilir');
+    codes.forEach(function (c) {
+      var n = dec(c.slice(4, 8)), mine = S.made.some(function (r) { return r.c === c && r.to === id; });
+      if (c.length !== 13 || n < 1 || makeCode(id, n, c.slice(0, 4)) !== c) { bad.push('Geçersiz hediye kodu: ' + c); return; }
+      if (seen[c]) { bad.push('Aynı kod iki kez: ' + fmtCode(c)); return; }
+      seen[c] = 1; sum += n;
+      info.push('Kod ' + fmtCode(c) + ' = ' + n + (mine ? ' (senin ürettiğin)' : ' (BU CİHAZDA ÜRETİLMEMİŞ)'));
+      if (!mine) bad.push('Bu cihazda üretilmemiş kod: ' + fmtCode(c));
+    });
+    if (gift !== sum) bad.push('Hediye ' + gift + ' ama kodların toplamı ' + sum + ' (açıklanamayan: ' + (gift - sum) + ')');
+    var pl = /giriş ödülü (\d+), hediye (\d+), harcanan (\d+), kalan (\d+)/.exec(text);
+    if (pl && (+pl[1] !== earned || +pl[2] !== gift || +pl[3] !== spent || +pl[4] !== bal)) bad.push('Maildeki düz yazı satırı imzalı veriyle uyuşmuyor');
+    var pid = /ID'm: (\d{8})/.exec(text); if (pid && pid[1] !== id) bad.push("Maildeki ID (" + pid[1] + ") imzalı ID ile farklı");
+    return (bad.length ? 'ŞÜPHELİ:\n- ' + bad.join('\n- ') : 'TEMİZ: imza geçerli, sayılar tutarlı.') + '\n\n' + info.join('\n');
+  }
   function giftAdd() {
     var n = Math.floor(Number(String($('kGiftAmt').value).replace(/\s/g, '').replace(',', '.')));
     if (!isFinite(n) || n < 1 || n > 100000) return toast('1 ile 100000 arasında bir sayı yaz.');
@@ -108,12 +203,20 @@
       CFG.app + " ID'm: " + r.cam, '',
       'Talep no: ' + r.no,
       'Talep zamanı: ' + r.t,
-      'Giriş günü: ' + S.days + ' (giriş ödülü ' + S.earned + ', hediye ' + S.gift + ', harcanan ' + S.spent + ', kalan ' + S.bal + ')', '',
+      'Giriş günü: ' + S.days + ' (giriş ödülü ' + S.earned + ', hediye ' + S.gift + ', harcanan ' + S.spent + ', kalan ' + S.bal + ')',
+      'Hediye kodları: ' + (S.codes.length ? S.codes.map(function (g) { return g.n + ' [' + fmtCode(g.c) + ', ' + g.t.slice(0, 10) + ']'; }).join('; ') : 'yok'),
+      'Doğrulama (silme/değiştirme): ' + proof(r), '',
       'Doğrulayıp aktivasyon kodumu gönderebilir misiniz? Gerekirse ekran görüntüsünü bu maile ekleyeceğim.'
     ].join('\r\n');
   }
+  var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
   function openMail(r) {
+    if (!isMobile) return openGmail(r);       // bilgisayarda mailto çoğu zaman sessizce hiçbir şey yapmaz
     location.href = 'mailto:' + mailAddr() + '?subject=' + encodeURIComponent(mailSubject(r)) + '&body=' + encodeURIComponent(mailBody(r));
+  }
+  function openGmail(r) {   // bilgisayarda mailto çalışmazsa: Gmail yazma ekranı doğrudan yeni sekmede açılır
+    var u = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(mailAddr()) + '&su=' + encodeURIComponent(mailSubject(r)) + '&body=' + encodeURIComponent(mailBody(r).replace(/\r\n/g, '\n'));
+    if (!window.open(u, '_blank', 'noopener')) location.href = u;
   }
   function pendingReq() { for (var i = 0; i < S.reqs.length; i++) if (S.reqs[i].no === S.pending) return S.reqs[i]; return null; }
 
@@ -134,6 +237,7 @@
   /* ===== Ekran ===== */
   function render() {
     if (!$('storePage')) return;
+    if ($('kVer')) $('kVer').textContent = 'kristal.js v7 yüklü';
     $('kBal').textContent = S.bal;
     $('kId').textContent = S.id;
     if (document.activeElement !== $('kCamId')) $('kCamId').value = S.cam;
@@ -160,7 +264,7 @@
 
     var pr = pendingReq(), pb = $('kPending');
     pb.hidden = !pr;
-    if (pr) $('kPendingTx').textContent = 'Bekleyen talep: ' + pr.pack + ' · Talep no ' + pr.no + '. Mail taslağı açılmadıysa aşağıdaki düğmeleri kullan; kristalin zaten düşüldü.';
+    if (pr) $('kPendingTx').textContent = 'Bekleyen talep: ' + pr.pack + ' · Talep no ' + pr.no + '. Alıcı: ' + mailAddr() + '. Mail açılmadıysa aşağıdaki düğmeleri kullan; kristalin zaten düşüldü.';
 
     var h = $('kHist'); h.textContent = '';
     $('kHistWrap').style.display = S.reqs.length ? '' : 'none';
@@ -169,6 +273,10 @@
         var d = document.createElement('div'); d.textContent = r.t + ' · ' + r.pack + ' · ' + r.cost + ' kristal · #' + r.no; h.appendChild(d);
       });
     }
+    var m = $('kMade'); m.textContent = '';
+    S.made.slice(-5).reverse().forEach(function (r) {
+      var d = document.createElement('div'); d.textContent = r.t + ' · ID ' + r.to + ' · ' + r.n + ' kristal · ' + fmtCode(r.c); m.appendChild(d);
+    });
     if (typeof paintIcons === 'function') paintIcons();
   }
 
@@ -198,6 +306,7 @@
     }
     S = load();
     if (!S.id) { S.id = newId(); save(); }
+    if (tampered) { save(); setTimeout(function () { toast('Kayıt değiştirilmiş görünüyor, kristaller sıfırlandı.'); }, 600); }
     daily();                       // ödül sessizce işlenir; sadece Mağaza sayfasında görünür
     render();
 
@@ -212,10 +321,15 @@
       $('kOwner').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
     $('kGiftAdd').addEventListener('click', giftAdd);
+    $('kGiftMake').addEventListener('click', giftMake);
+    $('kVerBtn').addEventListener('click', function () { $('kVerOut').textContent = verifyMail($('kVerIn').value); });
+    $('kCodeUse').addEventListener('click', giftRedeem);
+    $('kCode').addEventListener('keydown', function (e) { if (e.key === 'Enter') giftRedeem(); });
     $('kGiftClose').addEventListener('click', function () { $('kOwner').hidden = true; });
     $('kCamId').addEventListener('change', function () { S.cam = this.value.trim().slice(0, 60); save(); });
     $('kCopyId').addEventListener('click', function () { copy(S.id, 'ID kopyalandı: ' + S.id); });
     $('kMailAgain').addEventListener('click', function () { var r = pendingReq(); if (r) openMail(r); });
+    $('kMailGmail').addEventListener('click', function () { var r = pendingReq(); if (r) openGmail(r); });
     $('kMailCopy').addEventListener('click', function () {
       var r = pendingReq(); if (!r) return;
       copy('Alıcı: ' + mailAddr() + '\nKonu: ' + mailSubject(r) + '\n\n' + mailBody(r).replace(/\r\n/g, '\n'), 'Mail metni kopyalandı.');
@@ -230,7 +344,7 @@
   /* Yedek / geri yükleme (app.js bunu çağırır) */
   window.MKKristal = {
     exportData: function () { return JSON.parse(JSON.stringify(S)); },
-    importData: function (o) { var c = clean(o); if (!c.id) return false; S = c; daily(); save(); render(); return true; }
+    importData: function (o) { var c = clean(o); if (!c.id || !valid(c)) return false; S = c; daily(); save(); render(); return true; }
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
