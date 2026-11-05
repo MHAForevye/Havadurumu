@@ -86,7 +86,7 @@ async function addLog(env, uid, kind, delta, ref) {
 async function init(req, env) {
   const ip = req.headers.get('CF-Connecting-IP') || 'x', d = today();
   const h = await sha256hex('ip|' + d + '|' + ip);
-  await env.DB.prepare('DELETE FROM ipc WHERE d < ?').bind(new Date(Date.now() + 3 * 3600e3 - 2 * 86400e3).toISOString().slice(0, 10)).run();
+  if (rndInt(40) === 0) await env.DB.prepare('DELETE FROM ipc WHERE d < ?').bind(new Date(Date.now() + 3 * 3600e3 - 2 * 86400e3).toISOString().slice(0, 10)).run();   // eski sayaçları ara sıra temizle (her seferinde taramak okuma harcar)
   await env.DB.prepare('INSERT INTO ipc(h,d,c) VALUES(?,?,1) ON CONFLICT(h,d) DO UPDATE SET c=c+1').bind(h, d).run();
   const c = await env.DB.prepare('SELECT c FROM ipc WHERE h=? AND d=?').bind(h, d).first();
   if (c && c.c > CFG.maxNewPerIp) return fail('Bu ağdan bugün çok fazla yeni hesap açıldı. Yarın tekrar dene.', 429);
