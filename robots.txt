@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://mhaforevye.github.io/MikroKlimaKontrolMerkezi/sitemap.xml
+Sitemap: https://mikroklimakontrolmerkezi.forevye.workers.dev/sitemap.xml
