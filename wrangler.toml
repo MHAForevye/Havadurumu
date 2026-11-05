@@ -10,6 +10,6 @@ run_worker_first = ["/api/*"]       # sadece /api/* Worker'a gider, gerisi stati
 [[d1_databases]]
 binding = "DB"
 database_name = "mikroklima"
-database_id = "BURAYA-D1-ID-YAPIŞTIR"   # npx wrangler d1 create mikroklima  çıktısındaki id
+database_id = "a4576ecf-eead-4f1a-9cbf-ae0f6f79ccc6"   # npx wrangler d1 create mikroklima  çıktısındaki id
 
 # Gizli değer (dosyaya yazma!):  npx wrangler secret put ADMIN_TOKEN
